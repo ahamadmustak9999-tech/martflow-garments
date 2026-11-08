@@ -1,0 +1,2152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MartFlow Garments - Fashion & Wholesale OS</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👔</text></svg>">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- EmailJS CDN for Free Email OTP -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <style>
+    body.theme-light {
+      --bg-base: #f8fafc;
+      --card-bg: #ffffff;
+      --card-sub: #f1f5f9;
+      --border-color: #cbd5e1;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --input-bg: #ffffff;
+      --badge-retail-bg: #dbeafe;
+      --badge-retail-txt: #1e40af;
+      --badge-retail-border: #bfdbfe;
+      --badge-reg-bg: #dcfce7;
+      --badge-reg-txt: #166534;
+      --badge-reg-border: #bbf7d0;
+      --badge-green-bg: #dcfce7;
+      --badge-green-txt: #15803d;
+      --badge-amber-bg: #fef3c7;
+      --badge-amber-txt: #b45309;
+      --nav-inactive-txt: #334155;
+    }
+
+    body.theme-dark {
+      --bg-base: #060b18;
+      --card-bg: #0c1427;
+      --card-sub: #111c38;
+      --border-color: #1a2949;
+      --text-main: #f8fafc;
+      --text-muted: #8899b5;
+      --input-bg: #080e1e;
+      --badge-retail-bg: rgba(79, 70, 229, 0.4);
+      --badge-retail-txt: #a5b4fc;
+      --badge-retail-border: #4f46e5;
+      --badge-reg-bg: rgba(6, 78, 59, 0.7);
+      --badge-reg-txt: #34d399;
+      --badge-reg-border: #065f46;
+      --badge-green-bg: rgba(6, 78, 59, 0.7);
+      --badge-green-txt: #34d399;
+      --badge-amber-bg: rgba(120, 53, 15, 0.7);
+      --badge-amber-txt: #fbbf24;
+      --nav-inactive-txt: #8899b5;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .custom-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+    }
+    .form-input {
+      background-color: var(--input-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      border-radius: 0.75rem;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.825rem;
+    }
+    .form-input:focus { border-color: #4f46e5; outline: none; }
+    .ui-label { color: var(--text-muted); font-weight: 600; font-size: 0.75rem; }
+    .ui-subtext { color: var(--text-muted); font-size: 0.725rem; }
+
+    .nav-tab-active {
+      background-color: #4f46e5 !important;
+      color: #ffffff !important;
+      font-weight: 700 !important;
+      box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3) !important;
+    }
+    .nav-tab-inactive {
+      background-color: transparent !important;
+      color: var(--nav-inactive-txt) !important;
+      font-weight: 600 !important;
+    }
+    .nav-tab-inactive:hover { color: var(--text-main) !important; }
+
+    .auth-box-card {
+      background-color: #121929;
+      border: 1px solid #23314d;
+      border-radius: 1.25rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+    }
+    .auth-input {
+      background-color: #090e1a;
+      border: 1px solid #222e47;
+      color: #ffffff;
+      border-radius: 0.6rem;
+      padding: 0.75rem 0.9rem;
+      font-size: 0.9rem;
+      width: 100%;
+      outline: none;
+    }
+    .auth-input:focus { border-color: #6366f1; }
+    .auth-btn-primary {
+      background-color: #4f46e5;
+      color: #ffffff;
+      font-weight: 700;
+      border-radius: 0.6rem;
+      padding: 0.8rem;
+      width: 100%;
+      transition: background-color 0.2s;
+    }
+    .auth-btn-primary:hover { background-color: #4338ca; }
+
+    @keyframes alertPulseGlow {
+      0%, 100% {
+        background-color: rgba(180, 83, 9, 0.4);
+        border-color: rgba(245, 158, 11, 0.8);
+      }
+      50% {
+        background-color: rgba(220, 38, 38, 0.25);
+        border-color: rgba(239, 68, 68, 0.5);
+      }
+    }
+    .expiry-alert-blink {
+      animation: alertPulseGlow 1.5s infinite ease-in-out;
+    }
+
+    @media print {
+      body { background-color: #ffffff !important; color: #000000 !important; }
+      body * { visibility: hidden !important; }
+      #printable-receipt-area, #printable-receipt-area * { visibility: visible !important; }
+      #printable-receipt-area {
+        position: absolute !important;
+        left: 0 !important; top: 0 !important; width: 78mm !important;
+        margin: 0 !important; padding: 6px !important;
+        background: #ffffff !important; color: #000000 !important;
+        font-family: monospace !important; font-size: 11px !important; line-height: 1.25 !important;
+      }
+    }
+  </style>
+</head>
+<body class="theme-dark min-h-screen flex flex-col pb-16 select-none">
+
+  <!-- ================= 7-DAY EXPIRY ALERT BANNER ================= -->
+  <div id="sub-warning-banner" class="hidden expiry-alert-blink px-4 py-2 border-b flex items-center justify-center text-xs z-40">
+    <div class="flex items-center gap-2 text-center">
+      <span class="text-base animate-bounce">⚠️</span>
+      <div>
+        <span class="font-bold text-amber-300">Subscription Alert:</span>
+        <span class="text-slate-100 ml-1">Aapka plan <strong id="banner-time-left" class="text-amber-300 font-mono underline font-bold">7 din</strong> me expire hone wala hai! Billing chalu rakhne ke liye Super Admin se renew karwayein.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= AUTH OVERLAY ================= -->
+  <div id="auth-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="auth-box-card p-6 max-w-sm w-full space-y-4">
+      <div class="text-center space-y-1">
+        <h2 class="text-3xl font-extrabold tracking-tight text-indigo-400">MartFlow Garments</h2>
+        <p class="text-xs text-slate-400 font-medium">Textile & Wholesale Portal</p>
+      </div>
+
+      <!-- Segment Tabs -->
+      <div class="grid grid-cols-3 gap-1 p-1 rounded-xl bg-[#0a0f1d] border border-[#23314d]">
+        <button id="tab-login" onclick="switchAuthView('STORE_LOGIN')" class="py-2 rounded-lg text-xs font-bold transition bg-indigo-600 text-white shadow">Store Login</button>
+        <button id="tab-reg" onclick="switchAuthView('STORE_REG')" class="py-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white">Register</button>
+        <button id="tab-admin" onclick="switchAuthView('ADMIN_LOGIN')" class="py-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white">Admin</button>
+      </div>
+
+      <!-- 1. STORE LOGIN FORM -->
+      <div id="form-store-login" class="space-y-3 pt-1">
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Store Owner Email</label>
+          <input type="email" id="store-login-email" value="" autocomplete="off" placeholder="Registered garments email..." class="auth-input">
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-xs font-medium text-slate-400">Store Password</label>
+            <button type="button" onclick="openForgotModal()" class="text-[11px] text-indigo-400 hover:underline">Forgot?</button>
+          </div>
+          <input type="password" id="store-login-pass" value="" autocomplete="off" placeholder="••••••••" class="auth-input">
+        </div>
+        <button onclick="submitStoreLogin()" class="auth-btn-primary mt-2">Log In to Garments Store</button>
+      </div>
+
+      <!-- 2. STORE REGISTER FORM -->
+      <div id="form-store-reg" class="space-y-2.5 pt-1 hidden">
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Cloth Store / Brand Name *</label>
+          <input type="text" id="store-reg-name" value="" autocomplete="off" placeholder="e.g. Royal Garments" class="auth-input">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Owner Contact Phone *</label>
+          <input type="tel" id="store-reg-phone" maxlength="10" value="" autocomplete="off" placeholder="10-digit phone number" class="auth-input">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Store Owner Email *</label>
+          <input type="email" id="store-reg-email" value="" autocomplete="off" placeholder="owner@gmail.com" class="auth-input">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Create Store Password *</label>
+          <input type="password" id="store-reg-pass" value="" autocomplete="off" placeholder="Set password" class="auth-input">
+        </div>
+        <button onclick="submitStoreRegister()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition text-sm mt-2 shadow-lg shadow-emerald-900/30">
+          Register Garments Store (7 Days Free)
+        </button>
+      </div>
+
+      <!-- 3. ADMIN LOGIN FORM -->
+      <div id="form-admin-login" class="space-y-3 pt-1 hidden">
+        <div class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-center">
+          <p class="text-[11px] text-amber-300 font-semibold">Garments Super Admin Suite</p>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Master Admin Email</label>
+          <input type="email" id="admin-login-email" value="" autocomplete="off" placeholder="Admin email..." class="auth-input">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Master Admin Password</label>
+          <input type="password" id="admin-login-pass" value="" autocomplete="off" placeholder="••••••••" class="auth-input">
+        </div>
+        <button onclick="submitAdminLogin()" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-3 rounded-xl transition text-sm mt-2 shadow-lg shadow-amber-900/30">
+          Enter Master Admin Panel
+        </button>
+      </div>
+
+      <p id="auth-error-msg" class="text-rose-400 text-xs font-medium text-center min-h-[16px]"></p>
+    </div>
+  </div>
+
+  <!-- ================= FORGOT PASSWORD / EMAIL OTP MODAL ================= -->
+  <div id="modal-forgot-password" class="fixed inset-0 bg-black/95 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="auth-box-card p-6 max-w-sm w-full space-y-4">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">🔑 Reset Password</h3>
+        <button onclick="closeForgotModal()" class="text-slate-400 hover:text-white font-bold">✕</button>
+      </div>
+
+      <div id="forgot-step-1" class="space-y-3">
+        <p class="text-xs text-slate-300">Registered garments store email enter karein, verification code (OTP) mil jayega.</p>
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Store Owner Email</label>
+          <input type="email" id="forgot-email" placeholder="owner@gmail.com" class="auth-input">
+        </div>
+        <button onclick="sendOtpCode()" id="btn-send-otp" class="auth-btn-primary text-xs font-bold py-3">Send Verification Code (OTP)</button>
+      </div>
+
+      <div id="forgot-step-2" class="space-y-3 hidden">
+        <div class="p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-center">
+          <p class="text-xs text-emerald-400 font-semibold" id="forgot-status-text">OTP email par bhej diya gaya hai!</p>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">6-Digit OTP Code</label>
+          <input type="number" id="forgot-otp" placeholder="e.g. 482910" class="auth-input font-mono tracking-widest text-center text-lg font-bold">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">New Password</label>
+          <input type="password" id="forgot-new-pass" placeholder="Naya password likhein" class="auth-input">
+        </div>
+        <button onclick="verifyOtpAndChangePassword()" class="auth-btn-primary text-xs font-bold py-3">Verify OTP & Login</button>
+        <div class="pt-2 text-center">
+          <button onclick="resetForgotSteps()" class="text-[11px] text-slate-400 hover:text-white underline">Resend OTP</button>
+        </div>
+      </div>
+
+      <p id="forgot-err-msg" class="text-rose-400 text-xs font-medium text-center min-h-[16px]"></p>
+    </div>
+  </div>
+
+  <!-- ================= SUBSCRIPTION LOCKED OVERLAY ================= -->
+  <div id="modal-sub-locked" class="fixed inset-0 bg-black/95 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="custom-card rounded-3xl p-6 max-w-sm w-full text-center space-y-4 shadow-2xl border" style="border-color: var(--border-color)">
+      <div class="text-4xl">🔒</div>
+      <div>
+        <h3 class="text-lg font-bold text-rose-500">Subscription Expired / Suspended</h3>
+        <p class="ui-subtext mt-1">Aapki dukan ki validity khatam ho chuki hai. Garments POS temporarily lock hai.</p>
+      </div>
+      <div class="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 space-y-1">
+        <span class="text-[10px] ui-subtext">Monthly Renewal Cost:</span>
+        <div id="locked-fee-display" class="text-xl font-mono font-bold text-emerald-400">₹299.00</div>
+        <p class="text-[10px] text-slate-400 mt-1">Super Admin se plan renew karwane ke baad hi access open hoga.</p>
+      </div>
+      <button onclick="doLogout()" class="w-full py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition">
+        Return to Login Screen
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= SUPER ADMIN CONTROL PANEL ================= -->
+  <div id="modal-super-admin" class="fixed inset-0 bg-black/95 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="custom-card rounded-3xl p-5 max-w-5xl w-full max-h-[90vh] flex flex-col space-y-4 shadow-2xl border" style="border-color: var(--border-color)">
+      <div class="flex items-center justify-between pb-3 border-b" style="border-color: var(--border-color)">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">👑</span>
+          <div>
+            <h3 class="font-bold text-sm" style="color: var(--text-main)">Garments OS Master Control Panel</h3>
+            <p class="ui-subtext">Strictly showing Garments Stores & Tenants only.</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="loadAdminStores()" class="px-3 py-1.5 rounded-xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 text-xs font-bold">↻ Refresh</button>
+          <button onclick="exitAdminPanel()" class="px-3 py-1.5 rounded-xl bg-rose-600/20 text-rose-400 border border-rose-500/30 text-xs font-bold">Close Admin</button>
+        </div>
+      </div>
+
+      <!-- Stores Table -->
+      <div class="flex-1 overflow-y-auto custom-card rounded-2xl">
+        <table class="w-full text-left text-xs">
+          <thead class="border-b" style="background-color: var(--card-sub); border-color: var(--border-color); color: var(--text-muted)">
+            <tr>
+              <th class="px-4 py-3 font-bold">Store & Credentials</th>
+              <th class="px-3 py-3 font-bold">Live OTP</th>
+              <th class="px-3 py-3 font-bold">Price Plan</th>
+              <th class="px-3 py-3 font-bold">Status</th>
+              <th class="px-3 py-3 font-bold">Expiry Date & Time</th>
+              <th class="px-4 py-3 text-right font-bold">Owner Actions</th>
+            </tr>
+          </thead>
+          <tbody id="admin-stores-table-body" class="divide-y" style="border-color: var(--border-color)"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: CUSTOM CALENDAR & TIME PICKER ================= -->
+  <div id="modal-custom-expiry" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[60] flex items-center justify-center p-4 hidden">
+    <div class="custom-card rounded-3xl p-5 max-w-sm w-full space-y-4 shadow-2xl border" style="border-color: var(--border-color); background-color: var(--card-bg);">
+      <div class="flex items-center justify-between pb-2 border-b" style="border-color: var(--border-color)">
+        <div>
+          <h3 class="font-bold text-sm" style="color: var(--text-main)">📅 Set Store Expiry Date & Time</h3>
+          <p class="ui-subtext font-bold text-indigo-400" id="custom-expiry-store-name">Store Name</p>
+        </div>
+        <button onclick="closeCustomExpiryModal()" class="ui-subtext hover:text-red-500 font-bold p-1">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="ui-label block mb-1.5">Select Expiry Date & Exact Time (Calendar):</label>
+          <input type="datetime-local" id="custom-expiry-input" class="w-full form-input font-mono font-bold text-sm py-2.5">
+        </div>
+        <div class="p-3 rounded-2xl bg-indigo-600/10 border border-indigo-500/30 text-[11px] text-indigo-300 space-y-1">
+          <p>💡 <strong>Owner Control:</strong> Is chuni hui tarikh aur waqt par dukandar ka POS automatically suspend ho jayega.</p>
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-2">
+        <button onclick="closeCustomExpiryModal()" class="flex-1 py-2.5 rounded-xl custom-card text-xs font-bold" style="color: var(--text-main)">Cancel</button>
+        <button onclick="commitCustomExpiry()" class="flex-1 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-md shadow-purple-600/30">Save Date & Time</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="custom-card sticky top-0 z-30 px-4 py-2.5 flex items-center justify-between border-b shadow-sm">
+    <div class="flex items-center gap-3">
+      <div class="h-8 w-8 bg-indigo-600 rounded-xl flex items-center justify-center font-bold text-white text-xs shadow-md shadow-indigo-500/30">
+        👔
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="font-bold text-sm tracking-tight flex items-center gap-1.5" style="color: var(--text-main)">
+            <span id="header-store-display">Garments Store</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border" 
+                  style="background-color: var(--badge-retail-bg); color: var(--badge-retail-txt); border-color: var(--badge-retail-border)">
+              Garments OS
+            </span>
+          </h1>
+          <span class="text-[10px] font-bold flex items-center gap-1 px-2.5 py-0.5 rounded-full border"
+                style="background-color: var(--badge-reg-bg); color: var(--badge-reg-txt); border-color: var(--badge-reg-border)">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> <span id="header-plan-display">Active</span>
+          </span>
+        </div>
+        <p class="ui-subtext" id="current-clock">Loading...</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button onclick="promptSuperAdminAccess()" title="Owner Super Admin" class="p-2 rounded-xl custom-card text-xs hover:border-amber-500 transition text-amber-400">👑</button>
+      <button onclick="toggleTheme()" class="p-2 rounded-xl custom-card text-xs hover:border-indigo-500 transition"><span id="theme-btn-icon">☀️</span></button>
+      <button onclick="doLogout()" title="Manual Log Out" class="h-7 px-2.5 rounded-lg bg-rose-600/20 hover:bg-rose-600 border border-rose-500/30 text-rose-400 hover:text-white flex items-center justify-center text-xs font-bold transition">Log Out</button>
+    </div>
+  </header>
+
+  <!-- Navigation Bar -->
+  <div class="px-4 py-2 flex items-center justify-between border-b" style="border-color: var(--border-color); background-color: var(--card-sub)">
+    <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+      <button onclick="switchView('billing')" id="tab-btn-billing" class="px-3.5 py-1.5 rounded-xl text-xs nav-tab-active whitespace-nowrap transition">Counter POS</button>
+      <button onclick="switchView('inventory')" id="tab-btn-inventory" class="px-3.5 py-1.5 rounded-xl text-xs nav-tab-inactive whitespace-nowrap transition">Clothes Inventory</button>
+      <button onclick="switchView('sales')" id="tab-btn-sales" class="px-3.5 py-1.5 rounded-xl text-xs nav-tab-inactive whitespace-nowrap transition">Sales Ledger</button>
+      <button onclick="switchView('settings')" id="tab-btn-settings" class="px-3.5 py-1.5 rounded-xl text-xs nav-tab-inactive whitespace-nowrap transition">Store Settings</button>
+    </div>
+    <span class="text-[10px] font-mono hidden md:inline text-indigo-400 font-bold">👗 Men • Women • Boys • Girls</span>
+  </div>
+
+  <!-- Main View Container -->
+  <main class="flex-1 max-w-6xl w-full mx-auto p-4 space-y-4">
+    <!-- 1. COUNTER POS VIEW -->
+    <div id="view-billing" class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <div class="lg:col-span-7 space-y-3">
+        
+        <!-- BILLING MODE SELECTOR -->
+        <div class="custom-card rounded-2xl p-3 shadow-sm border" style="border-color: var(--border-color)">
+          <div class="flex items-center justify-between">
+            <span class="ui-label uppercase tracking-wider text-[11px] font-bold">Billing Mode:</span>
+            <div class="grid grid-cols-2 gap-1 bg-slate-900/60 p-1 rounded-xl border border-slate-700/50">
+              <button id="btn-mode-retail" onclick="setBillMode('RETAIL')" class="px-3 py-1 rounded-lg text-xs font-bold transition bg-indigo-600 text-white shadow">
+                🛍️ Retail Counter
+              </button>
+              <button id="btn-mode-wholesale" onclick="setBillMode('WHOLESALE')" class="px-3 py-1 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white">
+                📦 Wholesale / Bulk
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- CUSTOMER DETAILS -->
+        <div class="custom-card rounded-2xl p-3.5 space-y-2.5 shadow-sm">
+          <div class="flex items-center justify-between text-xs pb-1.5 border-b" style="border-color: var(--border-color)">
+            <span class="ui-label uppercase tracking-wider text-[10px]" id="cust-card-title">Customer / Buyer Details</span>
+            <span class="text-rose-500 font-bold text-[10px]">* Mandatory</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div>
+              <label class="block ui-label mb-1" id="label-cust-name">Customer Name <span class="text-rose-500">*</span></label>
+              <input type="text" id="cust-name" placeholder="Enter customer name..." class="w-full form-input">
+            </div>
+            <div>
+              <label class="block ui-label mb-1">Mobile Number</label>
+              <input type="tel" id="cust-phone" maxlength="10" placeholder="e.g. 9876543210" class="w-full form-input">
+            </div>
+          </div>
+
+          <!-- Wholesale Extra Fields -->
+          <div id="wholesale-extra-fields" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 hidden">
+            <div>
+              <label class="block ui-label mb-1">Buyer Firm / Shop Name</label>
+              <input type="text" id="cust-firm-name" placeholder="e.g. Roy Dresses" class="w-full form-input">
+            </div>
+            <div>
+              <label class="block ui-label mb-1">Buyer GSTIN (Optional)</label>
+              <input type="text" id="cust-gstin" placeholder="19AAAAA0000A1Z5" class="w-full form-input uppercase font-mono">
+            </div>
+          </div>
+        </div>
+
+        <!-- SEARCH BAR FOR CLOTHES -->
+        <div class="relative">
+          <label class="block ui-label mb-1">Search Clothes (e.g. Shirt, Jeans, Kurti, Frock, T-Shirt...)</label>
+          <div class="relative">
+            <input type="text" id="product-search-input" placeholder="Search by cloth name, size, SKU or barcode..." 
+              class="w-full form-input pl-8 text-xs font-medium" autocomplete="off" oninput="handleSearchSuggestions(this.value)">
+            <span class="absolute left-2.5 top-2.5 text-xs" style="color: var(--text-muted)">🔍</span>
+          </div>
+          <div id="search-suggestions-dropdown" class="absolute left-0 right-0 mt-1 custom-card rounded-2xl shadow-2xl z-40 max-h-64 overflow-y-auto divide-y hidden" style="border-color: var(--border-color)"></div>
+        </div>
+
+        <!-- ACTIVE BILL ITEMS -->
+        <div class="custom-card rounded-2xl p-3.5 space-y-2.5 shadow-sm">
+          <div class="flex items-center justify-between pb-1.5 border-b" style="border-color: var(--border-color)">
+            <span class="font-bold text-xs" style="color: var(--text-main)">Selected Clothes</span>
+            <span class="ui-subtext" id="items-count-badge">0 piece(s)</span>
+          </div>
+          <div id="items-rows-container" class="space-y-2"></div>
+          <div class="pt-1">
+            <button onclick="addItemRow()" class="px-3 py-1.5 rounded-xl bg-indigo-600/15 text-indigo-400 border border-indigo-500/30 text-xs font-bold hover:bg-indigo-600 hover:text-white transition">
+              + Add blank row
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- BILL SUMMARY & CHECKOUT -->
+      <div class="lg:col-span-5 custom-card rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-sm">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b" style="border-color: var(--border-color)">
+            <h3 class="ui-label uppercase tracking-wider font-bold">Payment & Bill Summary</h3>
+            <span id="badge-active-mode" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">RETAIL</span>
+          </div>
+          <div>
+            <label class="block ui-label mb-1">Payment mode</label>
+            <select id="payment-mode" class="w-full form-input cursor-pointer font-medium">
+              <option value="Cash">Cash (नकद)</option>
+              <option value="UPI">UPI / QR Code (PhonePe, GPay, Paytm)</option>
+              <option value="Credit / Khata">Credit / Khata (Wholesale Udhar)</option>
+              <option value="Card">Card / POS</option>
+            </select>
+          </div>
+          <div class="custom-card rounded-2xl p-3.5 flex items-center justify-between border-dashed">
+            <div>
+              <span class="ui-label block">Total Payable</span>
+              <span class="text-[10px] ui-subtext" id="wholesale-savings-hint">Standard Retail Pricing</span>
+            </div>
+            <span class="text-2xl font-mono font-bold text-emerald-400">
+              ₹<span id="grand-total-display">0.00</span>
+            </span>
+          </div>
+          <div>
+            <label class="block ui-label mb-1">Dispatch Note (optional)</label>
+            <input type="text" id="bill-note" placeholder="Remark / Parcel note..." class="w-full form-input">
+          </div>
+        </div>
+        <button onclick="processBill()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-indigo-600/30 transition text-sm">
+          Complete & Print Receipt
+        </button>
+      </div>
+    </div>
+
+    <!-- 2. INVENTORY MASTER VIEW (CLEAN - NO DELETE BUTTON) -->
+    <div id="view-inventory" class="hidden space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 class="text-lg font-bold" style="color: var(--text-main)">Garments Inventory Master</h2>
+          <p class="ui-subtext">Stock management with Retail, Wholesale rates (Protected against deletion).</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="exportCSV()" class="px-3 py-1.5 rounded-xl custom-card text-xs font-bold transition hover:border-indigo-500" style="color: var(--text-main)">↓ Export CSV</button>
+          <button onclick="openAddProductModal()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/20">+ Add Garment Item</button>
+        </div>
+      </div>
+
+      <div class="custom-card rounded-2xl p-3 space-y-2.5 shadow-sm">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <input type="text" id="inv-search" placeholder="Search cloth name, size, SKU or barcode..." class="form-input text-xs" oninput="renderInventory()">
+          <select id="inv-filter-cat" class="form-input text-xs cursor-pointer font-medium" onchange="renderInventory()">
+            <option value="All">All Categories (Men, Women, Kids)</option>
+            <option value="Men's Wear">Men's Wear</option>
+            <option value="Women's Wear">Women's Wear</option>
+            <option value="Boys (Kids)">Boys (Kids)</option>
+            <option value="Girls (Kids)">Girls (Kids)</option>
+            <option value="Accessories">Accessories</option>
+          </select>
+          <select id="inv-filter-stock" class="form-input text-xs cursor-pointer font-medium" onchange="renderInventory()">
+            <option value="All">All Stock Levels</option>
+            <option value="InStock">In Stock Only</option>
+            <option value="Reorder">Low Stock Alerts Only</option>
+          </select>
+        </div>
+        <div class="text-right text-[11px] font-mono font-semibold" style="color: var(--text-muted)" id="inv-count-label">0 items</div>
+      </div>
+
+      <div class="custom-card rounded-2xl overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="border-b" style="background-color: var(--card-sub); border-color: var(--border-color); color: var(--text-muted)">
+              <tr>
+                <th class="px-4 py-3 font-bold">Item & Size</th>
+                <th class="px-3 py-3 font-bold">Category</th>
+                <th class="px-3 py-3 font-bold">Retail Rate</th>
+                <th class="px-3 py-3 font-bold">Wholesale Rate</th>
+                <th class="px-3 py-3 font-bold">Stock (Pcs)</th>
+                <th class="px-4 py-3 text-right font-bold">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="inventory-table-body" class="divide-y" style="border-color: var(--border-color)"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. SALES LEDGER VIEW (CLEAN - AUTO PURGE TEXT & DELETE BUTTON REMOVED) -->
+    <div id="view-sales" class="hidden space-y-3">
+      <div class="grid grid-cols-3 gap-2 text-center">
+        <div class="custom-card p-3 rounded-2xl shadow-sm">
+          <p class="ui-label">Total Invoices</p>
+          <h4 id="stat-total-bills" class="text-base font-bold mt-0.5" style="color: var(--text-main)">0</h4>
+        </div>
+        <div class="custom-card p-3 rounded-2xl shadow-sm">
+          <p class="ui-label">Retail / Wholesale Splits</p>
+          <h4 id="stat-bill-splits" class="text-xs font-bold mt-1 text-indigo-400">0 Retail • 0 Wholesale</h4>
+        </div>
+        <div class="custom-card p-3 rounded-2xl shadow-sm">
+          <p class="ui-label">Total Revenue</p>
+          <h4 id="stat-total-amount" class="text-base font-bold font-mono text-emerald-400 mt-0.5">₹0.00</h4>
+        </div>
+      </div>
+
+      <div class="custom-card rounded-2xl p-4 shadow-sm">
+        <div class="flex items-center justify-between mb-3 pb-2 border-b" style="border-color: var(--border-color)">
+          <div>
+            <h3 class="ui-label uppercase tracking-wider">Garments Sales Ledger & Invoices</h3>
+            <span class="ui-subtext">Click "View" to inspect garments & re-print receipt</span>
+          </div>
+        </div>
+        <div class="divide-y text-xs" style="border-color: var(--border-color)" id="sales-ledger-list"></div>
+      </div>
+    </div>
+
+    <!-- 4. STORE SETTINGS VIEW -->
+    <div id="view-settings" class="hidden space-y-4 max-w-2xl mx-auto">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-bold" style="color: var(--text-main)">Garments Store Settings</h2>
+          <p class="ui-subtext">Shop branding, GSTIN, thermal receipt details and security.</p>
+        </div>
+        <button onclick="saveStoreSettings()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-indigo-600/30">
+          💾 Save settings
+        </button>
+      </div>
+
+      <!-- STORE BRANDING -->
+      <div class="custom-card rounded-3xl p-5 space-y-3.5 shadow-sm">
+        <div class="pb-2 border-b" style="border-color: var(--border-color)">
+          <h3 class="text-sm font-bold flex items-center gap-2" style="color: var(--text-main)">🏬 Garment Shop Branding</h3>
+        </div>
+        <div class="space-y-3 text-xs">
+          <div>
+            <label class="block ui-label mb-1">Shop Name *</label>
+            <input type="text" id="setting-store-name" class="w-full form-input font-medium" placeholder="Mustak Cloth Store">
+          </div>
+          <div>
+            <label class="block ui-label mb-1">Address</label>
+            <textarea id="setting-store-address" rows="2" class="w-full form-input resize-none font-medium" placeholder="Main Textile Market, Jangipur, West Bengal..."></textarea>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block ui-label mb-1">Contact Phone</label>
+              <input type="text" id="setting-store-phone" class="w-full form-input font-medium" placeholder="+91 98220 11223">
+            </div>
+            <div>
+              <label class="block ui-label mb-1">GSTIN (Tax ID)</label>
+              <input type="text" id="setting-store-gst" class="w-full form-input font-medium uppercase" placeholder="19ABCDE1234F1Z5">
+            </div>
+          </div>
+          <div>
+            <label class="block ui-label mb-1">UPI VPA (QR Code Payment)</label>
+            <input type="text" id="setting-store-upi" class="w-full form-input font-medium" placeholder="clothstore@upi">
+          </div>
+        </div>
+      </div>
+
+      <!-- RECEIPT CUSTOMIZER -->
+      <div class="custom-card rounded-3xl p-5 space-y-3.5 shadow-sm">
+        <div class="pb-2 border-b" style="border-color: var(--border-color)">
+          <h3 class="text-sm font-bold flex items-center gap-2" style="color: var(--text-main)">🧾 Garment Receipt Customizer</h3>
+        </div>
+        <div class="space-y-3 text-xs">
+          <div>
+            <label class="block ui-label mb-1">Receipt Title Header</label>
+            <input type="text" id="setting-receipt-header" class="w-full form-input font-medium" placeholder="MUSTAK CLOTH STORE">
+          </div>
+          <div>
+            <label class="block ui-label mb-1">Exchange Policy / Terms</label>
+            <input type="text" id="setting-receipt-policy" class="w-full form-input font-medium" placeholder="Exchange within 7 days with tag intact. No cash refund on wholesale lots.">
+          </div>
+          <div>
+            <label class="block ui-label mb-1">Footer Message</label>
+            <input type="text" id="setting-receipt-footer" class="w-full form-input font-medium" placeholder="Thank you for shopping with us! Please visit again.">
+          </div>
+          <div class="flex items-center gap-2 pt-1">
+            <input type="checkbox" id="setting-tax-split" checked class="w-4 h-4 rounded text-indigo-600 cursor-pointer">
+            <label for="setting-tax-split" class="ui-label cursor-pointer font-semibold">Breakdown 5% GST into CGST (2.5%) / SGST (2.5%)</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- PLAN STATUS -->
+      <div class="custom-card rounded-3xl p-5 space-y-3.5 shadow-sm">
+        <div class="pb-2 border-b" style="border-color: var(--border-color)">
+          <h3 class="text-sm font-bold flex items-center gap-2" style="color: var(--text-main)">🔑 Plan & License Status</h3>
+        </div>
+        <div class="grid grid-cols-2 gap-3 text-xs">
+          <div>
+            <span class="ui-label block mb-1">Plan Type</span>
+            <span id="setting-lic-plan" class="px-2.5 py-1 rounded-lg bg-indigo-950 text-indigo-300 font-bold tracking-wider inline-block">GARMENTS-7DAY-TRIAL</span>
+          </div>
+          <div>
+            <span class="ui-label block mb-1">Expires On</span>
+            <span id="setting-lic-expires" class="font-bold text-amber-400">Loading...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHANGE PASSWORD -->
+      <div class="custom-card rounded-3xl p-5 space-y-3.5 shadow-sm">
+        <div class="pb-2 border-b" style="border-color: var(--border-color)">
+          <h3 class="text-sm font-bold flex items-center gap-2" style="color: var(--text-main)">🔐 Change Store Password</h3>
+        </div>
+        <div class="space-y-3 text-xs">
+          <div>
+            <label class="block ui-label mb-1">Current Password *</label>
+            <input type="password" id="change-current-pass" class="w-full form-input font-medium" placeholder="Purana password likhein">
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block ui-label mb-1">New Password *</label>
+              <input type="password" id="change-new-pass" class="w-full form-input font-medium" placeholder="Naya password likhein">
+            </div>
+            <div>
+              <label class="block ui-label mb-1">Confirm New Password *</label>
+              <input type="password" id="change-confirm-pass" class="w-full form-input font-medium" placeholder="Naya password dubara likhein">
+            </div>
+          </div>
+          <div class="pt-1">
+            <button onclick="changeStorePassword()" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md shadow-emerald-600/30 transition">
+              Update Password
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL: VIEW BILL DETAILS -->
+  <div id="modal-invoice-detail" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4 hidden">
+    <div class="custom-card rounded-3xl p-5 max-w-md w-full space-y-4 shadow-2xl border" style="border-color: var(--border-color)">
+      <div class="flex items-center justify-between pb-2.5 border-b" style="border-color: var(--border-color)">
+        <div>
+          <h3 class="font-bold text-sm" id="detail-invoice-no" style="color: var(--text-main)">INV-000000</h3>
+          <p class="ui-subtext" id="detail-invoice-date">Date & Time</p>
+        </div>
+        <button onclick="closeInvoiceModal()" class="ui-subtext hover:text-red-500 text-base font-bold p-1">✕</button>
+      </div>
+
+      <div class="p-3 rounded-xl border space-y-1.5 text-xs" style="background-color: var(--card-sub); border-color: var(--border-color)">
+        <div class="flex justify-between"><span class="ui-label">Customer / Party:</span><span class="font-bold" id="detail-cust-name">-</span></div>
+        <div class="flex justify-between"><span class="ui-label">Bill Category:</span><span class="font-bold font-mono text-indigo-400" id="detail-bill-category">RETAIL</span></div>
+        <div class="flex justify-between"><span class="ui-label">Payment Mode:</span><span class="font-bold text-emerald-400" id="detail-pay-mode">CASH</span></div>
+      </div>
+
+      <div class="space-y-1.5">
+        <h4 class="ui-label uppercase tracking-wider">Garments Details:</h4>
+        <div class="max-h-48 overflow-y-auto divide-y border rounded-xl custom-card" style="border-color: var(--border-color)" id="detail-items-list"></div>
+      </div>
+
+      <div class="pt-2 border-t flex items-center justify-between" style="border-color: var(--border-color)">
+        <div>
+          <span class="ui-label block">Grand Total</span>
+          <span class="text-lg font-mono font-bold text-emerald-400" id="detail-total-amount">₹0.00</span>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="closeInvoiceModal()" class="px-3.5 py-2 rounded-xl custom-card text-xs font-bold transition hover:border-indigo-500" style="color: var(--text-main)">Close</button>
+          <button onclick="reprintActiveInvoice()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-indigo-600/30">🖨️ Re-Print</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADJUST STOCK -->
+  <div id="modal-adjust-stock" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-[60] flex items-center justify-center p-4 hidden">
+    <div class="custom-card rounded-3xl p-5 max-w-sm w-full space-y-3.5 shadow-2xl border" style="border-color: var(--border-color)">
+      <div class="flex items-center justify-between pb-2 border-b" style="border-color: var(--border-color)">
+        <div>
+          <h3 class="font-bold text-sm" id="adjust-title" style="color: var(--text-main)">Adjust Garment Stock</h3>
+          <p class="ui-subtext" id="adjust-subtitle">Stamped with date & time</p>
+        </div>
+        <button onclick="toggleModal('modal-adjust-stock')" class="ui-subtext hover:text-red-500 font-bold">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="ui-label">Pieces (+/-) *</label>
+            <input type="number" id="adjust-delta" placeholder="e.g. 50 or -5" class="w-full form-input mt-1 font-bold" oninput="previewAdjustMath()">
+          </div>
+          <div>
+            <label class="ui-label">Reason *</label>
+            <select id="adjust-reason" class="w-full form-input mt-1 font-medium">
+              <option value="New Lot / Stock In">New Lot / Restock</option>
+              <option value="Defect / Damaged">Defect / Damaged</option>
+              <option value="Customer Return">Customer Return</option>
+              <option value="Wholesale Sample">Wholesale Sample</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="ui-label">Note</label>
+          <input type="text" id="adjust-note" placeholder="Optional remark" class="w-full form-input mt-1">
+        </div>
+        <div class="custom-card rounded-xl p-2.5 text-center font-mono font-bold" style="color: var(--text-main)" id="adjust-preview-badge">0 pieces after adjustment</div>
+      </div>
+
+      <div class="flex gap-2 pt-2">
+        <button onclick="toggleModal('modal-adjust-stock')" class="flex-1 py-2 rounded-xl custom-card text-xs font-bold" style="color: var(--text-main)">Cancel</button>
+        <button onclick="commitStockAdjustment()" class="flex-1 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30">Post adjustment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EDIT / ADD CLOTHING ITEM -->
+  <div id="modal-product-editor" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-[60] flex items-center justify-center p-4 hidden">
+    <div class="custom-card rounded-3xl p-5 max-w-md w-full space-y-3 shadow-2xl border" style="border-color: var(--border-color); background-color: var(--card-bg);">
+      <div class="flex items-center justify-between pb-2 border-b" style="border-color: var(--border-color)">
+        <h3 class="font-bold text-sm" id="editor-title" style="color: var(--text-main)">Add Garment Item</h3>
+        <button onclick="toggleModal('modal-product-editor')" class="ui-subtext hover:text-red-500 font-bold p-1">✕</button>
+      </div>
+
+      <div class="space-y-2.5 text-xs">
+        <div>
+          <label class="ui-label">Cloth / Item Name *</label>
+          <input type="text" id="prod-name" placeholder="e.g. Formal Cotton Shirt" class="w-full form-input mt-1 font-bold">
+        </div>
+        
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="ui-label">Category *</label>
+            <select id="prod-category" class="w-full form-input mt-1 font-medium">
+              <option value="Men's Wear">Men's Wear</option>
+              <option value="Women's Wear">Women's Wear</option>
+              <option value="Boys (Kids)">Boys (Kids)</option>
+              <option value="Girls (Kids)">Girls (Kids)</option>
+              <option value="Accessories">Accessories</option>
+            </select>
+          </div>
+          <div>
+            <label class="ui-label">Size (e.g. M, L, XL, 32, Free) *</label>
+            <input type="text" id="prod-size" placeholder="L, XL, 32..." class="w-full form-input mt-1 font-semibold uppercase">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="ui-label">SKU / Item Code *</label>
+            <input type="text" id="prod-sku" placeholder="MSH-40-BLU" class="w-full form-input mt-1 font-mono">
+          </div>
+          <div>
+            <label class="ui-label">Barcode / Tag No.</label>
+            <input type="text" id="prod-barcode" placeholder="8901009876" class="w-full form-input mt-1 font-mono">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="ui-label">Cost (Purchase)</label>
+            <input type="number" id="prod-cost" placeholder="280" class="w-full form-input mt-1 font-bold">
+          </div>
+          <div>
+            <label class="ui-label text-indigo-400 font-bold">Retail Rate *</label>
+            <input type="number" id="prod-price" placeholder="499" class="w-full form-input mt-1 font-bold">
+          </div>
+          <div>
+            <label class="ui-label text-purple-400 font-bold">Wholesale Rate *</label>
+            <input type="number" id="prod-wholesale-price" placeholder="360" class="w-full form-input mt-1 font-bold">
+          </div>
+        </div>
+
+        <div>
+          <label class="ui-label">Initial Stock (Pieces) *</label>
+          <input type="number" id="prod-stock" placeholder="20" class="w-full form-input mt-1 font-bold">
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-2">
+        <button onclick="toggleModal('modal-product-editor')" class="flex-1 py-2.5 rounded-xl custom-card text-xs font-bold" style="color: var(--text-main)">Cancel</button>
+        <button onclick="commitSaveProduct()" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30">Save Garment</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="printable-receipt-area"></div>
+
+  <!-- ================= JAVASCRIPT ENGINE ================= -->
+  <script>
+    const SUPABASE_URL = "https://rcofrtcyhjgdsiotkkjq.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_6uFSLPyZ6w-VXAhkXgL5uA_cvFJO73C";
+    const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // EXACT SUPER ADMIN CREDENTIALS
+    const SUPER_ADMIN_EMAIL = "mtkahamad1@gmail.com";
+    const SUPER_ADMIN_PASS = "@MUSTAKAHAMAD9332";
+
+    const EMAILJS_SERVICE_ID = "service_martflow";
+    const EMAILJS_TEMPLATE_ID = "template_martflow_otp";
+    const EMAILJS_PUBLIC_KEY = "user_martflow_public";
+
+    // GARMENTS SPECIFIC PLAN IDENTIFIER
+    const GARMENTS_PLAN_PREFIX = "GARMENTS_TRIAL";
+
+    // DEFAULT PRE-LOADED CLOTHES
+    const DEFAULT_GARMENTS = [
+      { id: "g1", name: "Formal Cotton Shirt", category: "Men's Wear", size: "L", sku: "MSH-01", price: 549, wholesale_price: 380, cost: 300, stock: 24 },
+      { id: "g2", name: "Slim Fit Stretch Jeans", category: "Men's Wear", size: "32", sku: "MJN-02", price: 899, wholesale_price: 620, cost: 500, stock: 18 },
+      { id: "g3", name: "Embroidered Anarkali Kurti", category: "Women's Wear", size: "XL", sku: "WKT-01", price: 799, wholesale_price: 520, cost: 420, stock: 15 },
+      { id: "g4", name: "Printed Georgette Saree", category: "Women's Wear", size: "Free", sku: "WSR-02", price: 950, wholesale_price: 650, cost: 520, stock: 20 },
+      { id: "g5", name: "Boys Graphic T-Shirt", category: "Boys (Kids)", size: "26", sku: "BTS-01", price: 349, wholesale_price: 220, cost: 180, stock: 30 },
+      { id: "g6", name: "Boys Denim Joggers", category: "Boys (Kids)", size: "28", sku: "BJG-02", price: 499, wholesale_price: 340, cost: 260, stock: 22 },
+      { id: "g7", name: "Girls Princess Frock", category: "Girls (Kids)", size: "24", sku: "GFR-01", price: 599, wholesale_price: 390, cost: 310, stock: 16 },
+      { id: "g8", name: "Girls Cotton Leggings (Set of 2)", category: "Girls (Kids)", size: "26", sku: "GLG-02", price: 399, wholesale_price: 250, cost: 190, stock: 25 }
+    ];
+
+    window.currentStore = null;
+    window.products = [];
+    window.sales = [];
+    window.adminStoresCache = [];
+    window.currentTheme = localStorage.getItem('mf_garments_theme') || 'dark';
+    window.billMode = "RETAIL";
+    window.activeResetEmail = "";
+    window.activeExpiryStoreId = null;
+
+    window.storeConfig = {
+      name: 'Mustak Garments & Wholesale',
+      address: 'Main Textile Market, Jangipur, Murshidabad',
+      phone: '+91 98220 11223',
+      gstin: '19ABCDE1234F1Z5',
+      currency: '₹',
+      upi: 'garments@upi',
+      header: 'MUSTAK GARMENTS & WHOLESALE',
+      footer: 'Thank you for shopping with us!',
+      policy: 'Exchange within 7 days with tag intact.',
+      splitTax: true
+    };
+
+    window.rowCounter = 0;
+    window.activeAdjustId = null;
+    window.activeEditId = null;
+    window.activeDetailInvoice = null;
+
+    // ZERO PRE-FILL INITIALIZER
+    window.clearAllAuthInputs = function() {
+      document.getElementById("store-login-email").value = "";
+      document.getElementById("store-login-pass").value = "";
+      document.getElementById("store-reg-name").value = "";
+      document.getElementById("store-reg-phone").value = "";
+      document.getElementById("store-reg-email").value = "";
+      document.getElementById("store-reg-pass").value = "";
+      document.getElementById("admin-login-email").value = "";
+      document.getElementById("admin-login-pass").value = "";
+      document.getElementById("auth-error-msg").innerText = "";
+    };
+
+    window.switchAuthView = function(view) {
+      window.clearAllAuthInputs();
+      
+      const tabLogin = document.getElementById("tab-login");
+      const tabReg = document.getElementById("tab-reg");
+      const tabAdmin = document.getElementById("tab-admin");
+
+      const formLogin = document.getElementById("form-store-login");
+      const formReg = document.getElementById("form-store-reg");
+      const formAdmin = document.getElementById("form-admin-login");
+
+      const inactive = "py-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white";
+      tabLogin.className = inactive;
+      tabReg.className = inactive;
+      tabAdmin.className = inactive;
+
+      formLogin.classList.add("hidden");
+      formReg.classList.add("hidden");
+      formAdmin.classList.add("hidden");
+
+      if (view === "STORE_REG") {
+        tabReg.className = "py-2 rounded-lg text-xs font-bold transition bg-emerald-600 text-white shadow";
+        formReg.classList.remove("hidden");
+      } else if (view === "ADMIN_LOGIN") {
+        tabAdmin.className = "py-2 rounded-lg text-xs font-bold transition bg-amber-600 text-white shadow";
+        formAdmin.classList.remove("hidden");
+      } else {
+        tabLogin.className = "py-2 rounded-lg text-xs font-bold transition bg-indigo-600 text-white shadow";
+        formLogin.classList.remove("hidden");
+      }
+    };
+
+    // 1. STORE LOGIN
+    window.submitStoreLogin = async function() {
+      const email = document.getElementById("store-login-email").value.trim().toLowerCase();
+      const pass = document.getElementById("store-login-pass").value;
+      const err = document.getElementById("auth-error-msg");
+      err.innerText = "";
+
+      if (!email || !pass) {
+        err.innerText = "Email aur Password dono enter karein.";
+        return;
+      }
+
+      const { data, error } = await client.from("stores").select("*").eq("owner_email", email).maybeSingle();
+
+      if (error || !data) {
+        err.innerText = "Yeh garments store register nahi hai. 'Register' par tap karein.";
+        return;
+      }
+
+      const isGarmentStore = data.plan_type && data.plan_type.toUpperCase().includes("GARMENT");
+      if (!isGarmentStore) {
+        err.innerText = "Yeh MartFlow Grocery ka account hai! Garments ke liye alag se 'Register' karein.";
+        return;
+      }
+
+      if (data.password && data.password !== pass) {
+        err.innerText = "Galat password! 'Forgot?' par tap karein.";
+        return;
+      }
+
+      const expiry = new Date(data.expires_at || Date.now());
+      if (new Date() > expiry || data.status === "EXPIRED" || data.status === "SUSPENDED") {
+        localStorage.removeItem("martflow_garments_isolated_session");
+        document.getElementById("auth-modal").classList.add("hidden");
+        document.getElementById("modal-sub-locked").classList.remove("hidden");
+        document.getElementById("locked-fee-display").innerText = data.plan_type || "₹299.00";
+        return;
+      }
+
+      const currentTimestamp = new Date().toISOString();
+      await client.from("stores").update({ last_login_at: currentTimestamp }).eq("id", data.id);
+      data.last_login_at = currentTimestamp;
+
+      window.currentStore = data;
+      localStorage.setItem("martflow_garments_isolated_session", JSON.stringify(data));
+      document.getElementById("auth-modal").classList.add("hidden");
+      bootStoreSession();
+    };
+
+    // 2. STORE REGISTER
+    window.submitStoreRegister = async function() {
+      const name = document.getElementById("store-reg-name").value.trim();
+      const phone = document.getElementById("store-reg-phone").value.trim();
+      const email = document.getElementById("store-reg-email").value.trim().toLowerCase();
+      const pass = document.getElementById("store-reg-pass").value;
+      const err = document.getElementById("auth-error-msg");
+      err.innerText = "";
+
+      if (!name || !phone || !email || !pass) {
+        err.innerText = "Sabhi details bharna zaroori hai.";
+        return;
+      }
+
+      const { data: existing } = await client.from("stores").select("*").eq("owner_email", email).maybeSingle();
+      if (existing && existing.plan_type && existing.plan_type.toUpperCase().includes("GARMENT")) {
+        err.innerText = "Yeh garments store email pehle se registered hai. 'Store Login' karein.";
+        return;
+      }
+
+      const exp = new Date();
+      exp.setDate(exp.getDate() + 7);
+
+      const { data, error } = await client.from("stores").insert([{
+        store_name: name,
+        owner_email: email,
+        owner_phone: phone,
+        password: pass,
+        plan_type: GARMENTS_PLAN_PREFIX,
+        status: "ACTIVE",
+        expires_at: exp.toISOString(),
+        last_login_at: new Date().toISOString()
+      }]).select().single();
+
+      if (error) {
+        err.innerText = "Registration error: " + error.message;
+        return;
+      }
+
+      window.currentStore = data;
+      localStorage.setItem("martflow_garments_isolated_session", JSON.stringify(data));
+      document.getElementById("auth-modal").classList.add("hidden");
+      bootStoreSession();
+    };
+
+    // 3. MASTER ADMIN LOGIN
+    window.submitAdminLogin = function() {
+      const email = document.getElementById("admin-login-email").value.trim();
+      const pass = document.getElementById("admin-login-pass").value;
+      const err = document.getElementById("auth-error-msg");
+      err.innerText = "";
+
+      if (email === SUPER_ADMIN_EMAIL && pass === SUPER_ADMIN_PASS) {
+        document.getElementById("auth-modal").classList.add("hidden");
+        openSuperAdminPanel();
+      } else {
+        err.innerText = "Galat Super Admin credentials!";
+      }
+    };
+
+    // BILL MODE SWITCH
+    window.setBillMode = function(mode) {
+      window.billMode = mode;
+      const btnRetail = document.getElementById("btn-mode-retail");
+      const btnWholesale = document.getElementById("btn-mode-wholesale");
+      const extraFields = document.getElementById("wholesale-extra-fields");
+      const badgeActive = document.getElementById("badge-active-mode");
+      const savingsHint = document.getElementById("wholesale-savings-hint");
+
+      if (mode === "WHOLESALE") {
+        btnWholesale.className = "px-3 py-1 rounded-lg text-xs font-bold transition bg-purple-600 text-white shadow";
+        btnRetail.className = "px-3 py-1 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white";
+        extraFields.classList.remove("hidden");
+        badgeActive.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/20 text-purple-400 border border-purple-500/30";
+        badgeActive.innerText = "WHOLESALE";
+        savingsHint.innerText = "Applied wholesale / bulk lot rates";
+      } else {
+        btnRetail.className = "px-3 py-1 rounded-lg text-xs font-bold transition bg-indigo-600 text-white shadow";
+        btnWholesale.className = "px-3 py-1 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white";
+        extraFields.classList.add("hidden");
+        badgeActive.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30";
+        badgeActive.innerText = "RETAIL";
+        savingsHint.innerText = "Standard Retail Pricing";
+      }
+
+      refreshActiveItemOptions();
+      window.calculateBillTotal();
+    };
+
+    // BOOT SESSION
+    window.bootStoreSession = async function() {
+      if (!window.currentStore) return;
+
+      const { data: refreshed } = await client.from("stores").select("*").eq("id", window.currentStore.id).single();
+      if (refreshed) {
+        window.currentStore = refreshed;
+        localStorage.setItem("martflow_garments_isolated_session", JSON.stringify(refreshed));
+      }
+
+      const expiry = new Date(window.currentStore.expires_at || Date.now());
+      const now = new Date();
+      const diffMs = expiry - now;
+      const daysLeft = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+      if (diffMs <= 0 || window.currentStore.status === "SUSPENDED" || window.currentStore.status === "EXPIRED") {
+        localStorage.removeItem("martflow_garments_isolated_session");
+        document.getElementById("modal-sub-locked").classList.remove("hidden");
+        document.getElementById("locked-fee-display").innerText = window.currentStore.plan_type || "₹299.00";
+        document.getElementById("header-plan-display").innerText = "Expired";
+        return;
+      }
+
+      const banner = document.getElementById("sub-warning-banner");
+      if (daysLeft <= 7 && daysLeft > 0) {
+        banner.classList.remove("hidden");
+        document.getElementById("banner-time-left").innerText = daysLeft === 1 ? "aaj / 24 ghante" : `${daysLeft} din`;
+      } else {
+        banner.classList.add("hidden");
+      }
+
+      const savedCfg = localStorage.getItem('mf_garments_store_config');
+      if (savedCfg) {
+        try { window.storeConfig = JSON.parse(savedCfg); } catch(e){}
+      }
+      const cfg = window.storeConfig || {};
+
+      document.getElementById("header-store-display").innerText = window.currentStore.store_name;
+      document.getElementById("header-plan-display").innerText = `${daysLeft}d Left`;
+
+      if (document.getElementById("setting-store-name")) {
+        document.getElementById("setting-store-name").value = cfg.name || window.currentStore.store_name || "Mustak Garments";
+        document.getElementById("setting-store-address").value = cfg.address || "";
+        document.getElementById("setting-store-phone").value = cfg.phone || window.currentStore.owner_phone || "+91 98220 11223";
+        document.getElementById("setting-store-gst").value = cfg.gstin || "19ABCDE1234F1Z5";
+        document.getElementById("setting-store-upi").value = cfg.upi || "garments@upi";
+
+        document.getElementById("setting-receipt-header").value = cfg.header || window.currentStore.store_name || "MUSTAK GARMENTS";
+        document.getElementById("setting-receipt-footer").value = cfg.footer || "Thank you for shopping with us!";
+        document.getElementById("setting-receipt-policy").value = cfg.policy || "Exchange within 7 days with tag intact.";
+        document.getElementById("setting-tax-split").checked = cfg.splitTax !== false;
+
+        document.getElementById("setting-lic-expires").innerText = expiry.toLocaleDateString("en-GB", { day: '2-digit', month: 'short', year: 'numeric' });
+        document.getElementById("setting-lic-plan").innerText = window.currentStore.plan_type || "GARMENTS-7DAY-TRIAL";
+      }
+
+      await loadCloudInventory();
+      await loadCloudSales();
+      window.addItemRow();
+    };
+
+    // CLOTHES INVENTORY (PROTECTED AGAINST THEFT - NO DELETE BUTTON)
+    async function loadCloudInventory() {
+      const { data } = await client.from("products").select("*").eq("store_id", window.currentStore.id).order("name");
+      
+      const garmentsOnly = (data || []).filter(item => {
+        const cat = item.category || '';
+        return !['Grocery', 'Dairy', 'Beverages', 'Snacks', 'Household'].includes(cat);
+      });
+
+      if (!garmentsOnly || garmentsOnly.length === 0) {
+        const seedPayload = DEFAULT_GARMENTS.map(item => ({
+          store_id: window.currentStore.id,
+          name: item.name,
+          category: item.category,
+          sku: item.sku,
+          price: item.price,
+          cost: item.cost,
+          stock: item.stock
+        }));
+
+        const { data: inserted } = await client.from("products").insert(seedPayload).select();
+        window.products = inserted || DEFAULT_GARMENTS;
+      } else {
+        window.products = garmentsOnly;
+      }
+
+      renderInventory();
+    }
+
+    window.renderInventory = function() {
+      const q = (document.getElementById('inv-search').value || '').toLowerCase().trim();
+      const cat = document.getElementById('inv-filter-cat').value;
+      const stockFilter = document.getElementById('inv-filter-stock').value;
+
+      let list = window.products;
+
+      if (cat !== 'All') list = list.filter(p => p.category === cat);
+      if (stockFilter === 'InStock') list = list.filter(p => p.stock > 10);
+      if (stockFilter === 'Reorder') list = list.filter(p => p.stock <= 10);
+      if (q) list = list.filter(p => 
+        (p.name && p.name.toLowerCase().includes(q)) || 
+        (p.sku && p.sku.toLowerCase().includes(q)) || 
+        (p.size && p.size.toLowerCase().includes(q))
+      );
+
+      document.getElementById('inv-count-label').innerText = `${list.length} garments`;
+
+      const tbody = document.getElementById('inventory-table-body');
+      tbody.innerHTML = list.map(p => {
+        const wholesalePrice = p.wholesale_price || (p.price * 0.85);
+        const isLow = (p.stock || 0) <= 5;
+
+        // NOTE: DELETE BUTTON REMOVED PERMANENTLY FOR ANTI-THEFT
+        return `
+          <tr class="hover:bg-indigo-600/5 transition">
+            <td class="px-4 py-3">
+              <span class="font-bold block" style="color: var(--text-main)">${p.name}</span>
+              <div class="flex items-center gap-1.5 mt-0.5">
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold">Size: ${p.size || 'Free'}</span>
+                <span class="text-[10px] ui-subtext font-mono">${p.sku || '-'}</span>
+              </div>
+            </td>
+            <td class="px-3 py-3 font-semibold text-[11px]" style="color: var(--text-main)">${p.category || "General"}</td>
+            <td class="px-3 py-3 font-bold font-mono text-indigo-400">₹${parseFloat(p.price).toFixed(2)}</td>
+            <td class="px-3 py-3 font-bold font-mono text-purple-400">₹${parseFloat(wholesalePrice).toFixed(2)}</td>
+            <td class="px-3 py-3">
+              <span style="background-color: ${isLow ? 'var(--badge-amber-bg)' : 'var(--badge-green-bg)'}; color: ${isLow ? 'var(--badge-amber-txt)' : 'var(--badge-green-txt)'};" class="text-[10px] px-2.5 py-0.5 rounded-full font-bold">
+                ${isLow ? 'Low · ' : ''}${p.stock || 0} Pcs
+              </span>
+            </td>
+            <td class="px-4 py-3 text-right space-x-1.5 whitespace-nowrap">
+              <button onclick="openAdjustModal('${p.id}')" class="px-2.5 py-1 rounded-lg bg-indigo-600/15 text-indigo-400 hover:bg-indigo-600 hover:text-white transition text-[11px] font-bold">Stock</button>
+              <button onclick="openEditModal('${p.id}')" class="px-2.5 py-1 rounded-lg custom-card hover:bg-slate-700 transition text-[11px] font-bold" style="color: var(--text-main)">Edit</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    };
+
+    window.openEditModal = function(id) {
+      window.activeEditId = id;
+      const p = window.products.find(x => String(x.id) === String(id));
+      if (!p) return alert("Garment record nahi mila!");
+
+      document.getElementById('editor-title').innerText = `Edit: ${p.name}`;
+      document.getElementById('prod-sku').value = p.sku || '';
+      document.getElementById('prod-barcode').value = p.barcode || '';
+      document.getElementById('prod-name').value = p.name || '';
+      document.getElementById('prod-category').value = p.category || "Men's Wear";
+      document.getElementById('prod-size').value = p.size || 'M';
+      document.getElementById('prod-cost').value = p.cost !== undefined ? p.cost : '';
+      document.getElementById('prod-price').value = p.price !== undefined ? p.price : '';
+      document.getElementById('prod-wholesale-price').value = p.wholesale_price !== undefined ? p.wholesale_price : (p.price ? (p.price * 0.8) : '');
+      document.getElementById('prod-stock').value = p.stock !== undefined ? p.stock : 0;
+      
+      toggleModal('modal-product-editor');
+    };
+
+    window.commitSaveProduct = async function() {
+      const name = document.getElementById('prod-name').value.trim();
+      const sku = document.getElementById('prod-sku').value.trim();
+      const barcode = document.getElementById('prod-barcode').value.trim();
+      const category = document.getElementById('prod-category').value;
+      const size = document.getElementById('prod-size').value.trim() || 'Free';
+      const cost = parseFloat(document.getElementById('prod-cost').value) || 0;
+      const price = parseFloat(document.getElementById('prod-price').value) || 0;
+      const stock = parseInt(document.getElementById('prod-stock').value) || 0;
+
+      if (!name || !sku || price <= 0) return alert('Name, SKU aur Retail Price zaroori hain!');
+
+      const payload = {
+        store_id: window.currentStore.id,
+        sku: sku,
+        barcode: barcode,
+        name: name,
+        category: category,
+        cost: cost,
+        price: price,
+        stock: stock
+      };
+
+      let res;
+      if (window.activeEditId) {
+        res = await client.from("products").update(payload).eq("id", window.activeEditId);
+      } else {
+        res = await client.from("products").insert([payload]);
+      }
+
+      if (res && res.error) {
+        alert("Save fail: " + res.error.message);
+        return;
+      }
+
+      alert("✅ Garment item save ho gaya!");
+      toggleModal('modal-product-editor');
+      await loadCloudInventory();
+      refreshActiveItemOptions();
+    };
+
+    window.openAdjustModal = function(id) {
+      window.activeAdjustId = id;
+      const p = window.products.find(x => String(x.id) === String(id));
+      if (!p) return;
+      document.getElementById('adjust-title').innerText = `Stock: ${p.name} (${p.size || 'Free'})`;
+      document.getElementById('adjust-subtitle').innerText = `Current: ${p.stock || 0} Pieces`;
+      document.getElementById('adjust-delta').value = '';
+      document.getElementById('adjust-note').value = '';
+      document.getElementById('adjust-preview-badge').innerText = `${p.stock || 0} pieces after adjustment`;
+      toggleModal('modal-adjust-stock');
+    };
+
+    window.previewAdjustMath = function() {
+      const p = window.products.find(x => String(x.id) === String(window.activeAdjustId));
+      if (!p) return;
+      const delta = parseInt(document.getElementById('adjust-delta').value) || 0;
+      const result = Math.max(0, (p.stock || 0) + delta);
+      document.getElementById('adjust-preview-badge').innerText = `${result} pieces after adjustment`;
+    };
+
+    window.commitStockAdjustment = async function() {
+      const p = window.products.find(x => String(x.id) === String(window.activeAdjustId));
+      if (!p) return;
+      const delta = parseInt(document.getElementById('adjust-delta').value);
+      if (isNaN(delta) || delta === 0) return alert('Valid number of pieces (+/-) enter karein');
+
+      const newStock = Math.max(0, (p.stock || 0) + delta);
+      const { error } = await client.from("products").update({ stock: newStock }).eq("id", p.id);
+      if (error) {
+        alert("Stock update error: " + error.message);
+        return;
+      }
+
+      toggleModal('modal-adjust-stock');
+      await loadCloudInventory();
+    };
+
+    // SALES & COUNTER POS (SILENT 6-MONTH AUTO-PURGE IN BACKGROUND)
+    async function loadCloudSales() {
+      if (!window.currentStore) return;
+
+      // SILENT CLEANUP: 6 Months (180 days) se purane sabhi bills automatically delete honge
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      const cutoffDate = sixMonthsAgo.toISOString();
+
+      try {
+        await client
+          .from("sales")
+          .delete()
+          .eq("store_id", window.currentStore.id)
+          .lt("created_at", cutoffDate);
+      } catch (e) {}
+
+      // Fetch fresh active bills
+      const { data } = await client
+        .from("sales")
+        .select("*")
+        .eq("store_id", window.currentStore.id)
+        .order("created_at", { ascending: false });
+      
+      window.sales = (data || []).filter(bill => {
+        if (!bill.items || bill.items.length === 0) return true;
+        const hasGrocery = bill.items.some(it => {
+          const n = (it.name || '').toLowerCase();
+          return n.includes('milk') || n.includes('atta') || n.includes('oil') || n.includes('biscuit') || n.includes('sugar');
+        });
+        return !hasGrocery;
+      });
+
+      renderSales();
+    }
+
+    window.processBill = async function() {
+      const custNameInput = document.getElementById('cust-name');
+      const custName = custNameInput.value.trim();
+
+      if (!custName) {
+        alert('Buyer / Customer name likhna zaroori hai!');
+        custNameInput.focus();
+        custNameInput.classList.add('border-rose-500');
+        setTimeout(() => custNameInput.classList.remove('border-rose-500'), 2500);
+        return;
+      }
+
+      const rows = document.querySelectorAll('.item-entry-row');
+      let billItems = [];
+      let totalAmount = 0;
+
+      for (let row of rows) {
+        const select = row.querySelector('.product-select');
+        const qtyInput = row.querySelector('.qty-input');
+        const selected = select.options[select.selectedIndex];
+
+        if (selected && selected.value) {
+          const p = window.products.find(x => String(x.id) === String(selected.value));
+          const qty = parseInt(qtyInput.value) || 1;
+          if (p) {
+            const applicablePrice = window.billMode === "WHOLESALE" 
+              ? (p.wholesale_price || (p.price * 0.85)) 
+              : p.price;
+
+            billItems.push({
+              id: p.id,
+              name: p.name,
+              sku: p.sku,
+              size: p.size || 'Free',
+              category: p.category || "Men's Wear",
+              rate_type: window.billMode,
+              price: applicablePrice,
+              qty: qty,
+              total: applicablePrice * qty
+            });
+            totalAmount += applicablePrice * qty;
+
+            const updatedStock = Math.max(0, (p.stock || 0) - qty);
+            await client.from("products").update({ stock: updatedStock }).eq("id", p.id);
+          }
+        }
+      }
+
+      if (billItems.length === 0) {
+        alert('Kam se kam 1 Garment select karein!');
+        return;
+      }
+
+      const custPhone = document.getElementById('cust-phone').value.trim() || 'N/A';
+      const firmName = document.getElementById('cust-firm-name').value.trim() || '';
+      const buyerGstin = document.getElementById('cust-gstin').value.trim() || '';
+      const payMode = document.getElementById('payment-mode').value;
+      const note = document.getElementById('bill-note').value.trim();
+      const invoiceNo = (window.billMode === "WHOLESALE" ? 'WS-' : 'INV-') + Math.floor(100000 + Math.random() * 900000);
+
+      const invoiceRecord = {
+        store_id: window.currentStore.id,
+        invoice_no: invoiceNo,
+        customer_name: firmName ? `${firmName} (${custName})` : custName,
+        customer_phone: custPhone,
+        mode: payMode,
+        note: (window.billMode === "WHOLESALE" ? `[WHOLESALE] ` : `[RETAIL] `) + (buyerGstin ? `GSTIN: ${buyerGstin} | ` : '') + note,
+        total: totalAmount,
+        items: billItems
+      };
+
+      const { data, error } = await client.from("sales").insert([invoiceRecord]).select().single();
+      if (error) {
+        alert("Failed to save bill: " + error.message);
+        return;
+      }
+
+      window.executeDirectPrint({
+        invoiceNo: data.invoice_no,
+        billMode: window.billMode,
+        firmName: firmName,
+        buyerGstin: buyerGstin,
+        dateTime: new Date(data.created_at).toLocaleString('en-IN'),
+        customer: custName,
+        phone: data.customer_phone,
+        mode: data.mode,
+        note: data.note,
+        total: data.total,
+        items: data.items
+      });
+
+      document.getElementById('items-rows-container').innerHTML = '';
+      window.rowCounter = 0;
+      window.addItemRow();
+      custNameInput.value = '';
+      document.getElementById('cust-phone').value = '';
+      document.getElementById('cust-firm-name').value = '';
+      document.getElementById('cust-gstin').value = '';
+      document.getElementById('bill-note').value = '';
+      window.calculateBillTotal();
+
+      await loadCloudInventory();
+      await loadCloudSales();
+    };
+
+    window.refreshActiveItemOptions = function() {
+      const selects = document.querySelectorAll('.product-select');
+      selects.forEach(select => {
+        const val = select.value;
+        select.innerHTML = `
+          <option value="">Choose garment item</option>
+          ${window.products.map(p => {
+            const currentPrice = window.billMode === "WHOLESALE" ? (p.wholesale_price || (p.price * 0.85)) : p.price;
+            const sizeLabel = p.size ? `[${p.size}]` : '';
+            return `
+              <option value="${p.id}" data-retail="${p.price}" data-wholesale="${p.wholesale_price || (p.price * 0.85)}" data-stock="${p.stock}" ${String(p.id) === String(val) ? 'selected' : ''}>
+                ${p.name} ${sizeLabel} — ₹${parseFloat(currentPrice).toFixed(2)} (${p.stock || 0} pcs)
+              </option>
+            `;
+          }).join('')}
+        `;
+      });
+    };
+
+    window.handleSearchSuggestions = function(query) {
+      const dropdown = document.getElementById('search-suggestions-dropdown');
+      const q = query.trim().toLowerCase();
+
+      if (!q) {
+        dropdown.classList.add('hidden');
+        return;
+      }
+
+      const matches = window.products.filter(p => 
+        (p.name && p.name.toLowerCase().includes(q)) || 
+        (p.sku && p.sku.toLowerCase().includes(q)) || 
+        (p.category && p.category.toLowerCase().includes(q)) ||
+        (p.size && p.size.toLowerCase().includes(q))
+      );
+
+      if (matches.length === 0) {
+        dropdown.innerHTML = '<p class="text-xs ui-subtext p-3 text-center">No clothing stock found.</p>';
+      } else {
+        dropdown.innerHTML = matches.map(p => {
+          const isLow = (p.stock || 0) <= 5;
+          const priceToShow = window.billMode === "WHOLESALE" ? (p.wholesale_price || (p.price * 0.85)) : p.price;
+          return `
+            <div onclick="pickProductFromSearch('${p.id}')" class="p-2.5 flex items-center justify-between hover:bg-indigo-600/10 cursor-pointer transition">
+              <div>
+                <p class="font-bold text-xs" style="color: var(--text-main)">${p.name} <span class="text-indigo-400 font-mono font-bold">(${p.size || 'Free'})</span></p>
+                <span class="text-[10px] ui-subtext font-mono">${p.category || 'Garments'} • ${p.sku || '-'}</span>
+              </div>
+              <div class="text-right">
+                <span class="text-xs font-bold font-mono text-emerald-400">₹${parseFloat(priceToShow).toFixed(2)}</span>
+                <span class="block text-[9px] px-2 py-0.5 rounded-full font-bold mt-0.5 ${isLow ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'}">
+                  ${p.stock || 0} Pcs
+                </span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      dropdown.classList.remove('hidden');
+    };
+
+    window.pickProductFromSearch = function(productId) {
+      document.getElementById('search-suggestions-dropdown').classList.add('hidden');
+      document.getElementById('product-search-input').value = '';
+
+      const rows = document.querySelectorAll('.item-entry-row');
+      let filled = false;
+      for (let row of rows) {
+        const select = row.querySelector('.product-select');
+        if (!select.value) {
+          select.value = productId;
+          filled = true;
+          break;
+        }
+      }
+
+      if (!filled) window.addItemRow(productId);
+      window.calculateBillTotal();
+    };
+
+    window.addItemRow = function(preselectedId = '') {
+      window.rowCounter++;
+      const container = document.getElementById('items-rows-container');
+      const rowId = `row_${window.rowCounter}`;
+
+      const rowDiv = document.createElement('div');
+      rowDiv.id = rowId;
+      rowDiv.className = 'flex items-center gap-1.5 item-entry-row';
+
+      rowDiv.innerHTML = `
+        <select class="flex-1 min-w-0 form-input cursor-pointer product-select text-xs truncate font-medium" onchange="calculateBillTotal()">
+          <option value="">Choose garment item</option>
+          ${window.products.map(p => {
+            const currentPrice = window.billMode === "WHOLESALE" ? (p.wholesale_price || (p.price * 0.85)) : p.price;
+            const sizeLabel = p.size ? `[${p.size}]` : '';
+            return `
+              <option value="${p.id}" data-retail="${p.price}" data-wholesale="${p.wholesale_price || (p.price * 0.85)}" data-stock="${p.stock}" ${String(p.id) === String(preselectedId) ? 'selected' : ''}>
+                ${p.name} ${sizeLabel} — ₹${parseFloat(currentPrice).toFixed(2)} (${p.stock || 0} pcs)
+              </option>
+            `;
+          }).join('')}
+        </select>
+        <input type="number" min="1" value="1" placeholder="Qty" class="w-16 form-input text-center font-bold text-xs qty-input shrink-0" oninput="calculateBillTotal()">
+        <button onclick="removeRow('${rowId}')" class="p-2 text-rose-500 hover:text-rose-400 text-sm font-bold shrink-0">🗑️</button>
+      `;
+
+      container.appendChild(rowDiv);
+      calculateBillTotal();
+    };
+
+    window.removeRow = function(rowId) {
+      const rows = document.querySelectorAll('.item-entry-row');
+      if (rows.length <= 1) return alert('Bill me kam se kam 1 row hona zaroori hai!');
+      const el = document.getElementById(rowId);
+      if (el) el.remove();
+      calculateBillTotal();
+    };
+
+    window.calculateBillTotal = function() {
+      const rows = document.querySelectorAll('.item-entry-row');
+      let grandTotal = 0;
+      let count = 0;
+
+      rows.forEach(row => {
+        const select = row.querySelector('.product-select');
+        const qtyInput = row.querySelector('.qty-input');
+        const selected = select.options[select.selectedIndex];
+
+        if (selected && selected.value) {
+          const retailP = parseFloat(selected.getAttribute('data-retail')) || 0;
+          const wholesaleP = parseFloat(selected.getAttribute('data-wholesale')) || retailP;
+          const price = window.billMode === "WHOLESALE" ? wholesaleP : retailP;
+          const qty = parseInt(qtyInput.value) || 1;
+          grandTotal += price * qty;
+          count += qty;
+        }
+      });
+
+      document.getElementById('grand-total-display').innerText = grandTotal.toFixed(2);
+      document.getElementById('items-count-badge').innerText = `${count} piece(s)`;
+    };
+
+    // PRINTING
+    window.executeDirectPrint = function(inv) {
+      const cfg = window.storeConfig || {};
+      const printDiv = document.getElementById('printable-receipt-area');
+
+      const isWholesale = inv.billMode === "WHOLESALE" || (inv.invoiceNo && inv.invoiceNo.startsWith("WS-"));
+      const subtotal = inv.total;
+      const taxAmount = (subtotal * 0.05);
+      const cgst = (taxAmount / 2).toFixed(2);
+      const sgst = (taxAmount / 2).toFixed(2);
+
+      printDiv.innerHTML = `
+        <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 5px; margin-bottom: 5px;">
+          <h2 style="font-size: 14px; margin: 0; font-weight: bold; color: #000;">${cfg.header || (window.currentStore ? window.currentStore.store_name : 'GARMENTS STORE')}</h2>
+          <div style="font-size: 10px; font-weight: bold; margin: 2px 0;">[${isWholesale ? 'WHOLESALE TAX INVOICE' : 'RETAIL INVOICE'}]</div>
+          ${cfg.address ? `<p style="margin: 2px 0; font-size: 9px; color: #000;">${cfg.address}</p>` : ''}
+          ${cfg.phone || (window.currentStore && window.currentStore.owner_phone) ? `<p style="margin: 2px 0; font-size: 9px; color: #000;">Phone: ${cfg.phone || window.currentStore.owner_phone}</p>` : ''}
+          ${cfg.gstin ? `<p style="margin: 2px 0; font-size: 9px; font-weight: bold; color: #000;">GSTIN: ${cfg.gstin}</p>` : ''}
+          <p style="margin: 2px 0; font-size: 9px; color: #000;">Date: ${inv.dateTime}</p>
+          <p style="margin: 2px 0; font-weight: bold; color: #000;">Bill No: ${inv.invoiceNo}</p>
+        </div>
+
+        <div style="margin-bottom: 5px; color: #000; font-size: 10px;">
+          <div>Customer / Party: <strong>${inv.customer}</strong></div>
+          ${inv.firmName ? `<div>Firm: <strong>${inv.firmName}</strong></div>` : ''}
+          ${inv.buyerGstin ? `<div>Buyer GSTIN: <strong>${inv.buyerGstin}</strong></div>` : ''}
+          <div>Phone: <span>${inv.phone}</span></div>
+          ${inv.note ? `<div>Remark: <span>${inv.note}</span></div>` : ''}
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; font-size: 10px; margin-bottom: 5px;">
+          <thead>
+            <tr style="border-bottom: 1px dashed #000; text-align: left;">
+              <th style="color: #000;">Garment Item</th>
+              <th style="text-align: center; color: #000;">Pcs</th>
+              <th style="text-align: right; color: #000;">Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${(inv.items || []).map(i => `
+              <tr>
+                <td style="color: #000;">
+                  ${i.name} ${i.size ? `<span style="font-size: 8px;">(${i.size})</span>` : ''}
+                </td>
+                <td style="text-align: center; color: #000;">${i.qty}</td>
+                <td style="text-align: right; color: #000;">₹${parseFloat(i.total || (i.price * i.qty)).toFixed(2)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+
+        <div style="border-top: 1px dashed #000; padding-top: 4px; color: #000; font-size: 10px;">
+          <div style="display: flex; justify-content: space-between;"><span>Subtotal:</span><span>₹${subtotal.toFixed(2)}</span></div>
+          ${cfg.splitTax ? `
+            <div style="display: flex; justify-content: space-between; font-size: 9px;"><span>CGST (2.5%):</span><span>₹${cgst}</span></div>
+            <div style="display: flex; justify-content: space-between; font-size: 9px;"><span>SGST (2.5%):</span><span>₹${sgst}</span></div>
+          ` : ''}
+          <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 12px; margin-top: 4px; border-top: 1px dashed #000; padding-top: 4px;">
+            <span>NET AMOUNT:</span>
+            <span>₹${parseFloat(inv.total).toFixed(2)}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 9px; margin-top: 2px;">
+            <span>Payment Mode:</span><span>${inv.mode}</span>
+          </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 8px; font-size: 9px; color: #000; border-top: 1px dashed #000; padding-top: 4px;">
+          <p style="margin: 2px 0 0 0;">${cfg.policy || 'Exchange within 7 days with tag intact.'}</p>
+          <p style="margin: 2px 0 0 0;">${cfg.footer || 'Thank you for shopping with us!'}</p>
+        </div>
+      `;
+
+      setTimeout(() => { window.print(); }, 50);
+    };
+
+    // SALES LEDGER (CLEAN - NO DELETE BUTTON BESIDE BILL)
+    window.renderSales = function() {
+      document.getElementById('stat-total-bills').innerText = window.sales.length;
+      const total = window.sales.reduce((a, s) => a + parseFloat(s.total || 0), 0);
+      document.getElementById('stat-total-amount').innerText = `₹${total.toFixed(2)}`;
+
+      const wholesaleCount = window.sales.filter(s => (s.invoice_no && s.invoice_no.startsWith("WS-")) || (s.note && s.note.includes("WHOLESALE"))).length;
+      const retailCount = window.sales.length - wholesaleCount;
+      document.getElementById('stat-bill-splits').innerText = `${retailCount} Retail • ${wholesaleCount} Wholesale`;
+
+      const list = document.getElementById('sales-ledger-list');
+      if (window.sales.length === 0) {
+        list.innerHTML = '<p class="text-center ui-subtext py-6 text-xs font-semibold">No active garment transactions recorded in the last 6 months.</p>';
+      } else {
+        list.innerHTML = window.sales.map((s, index) => {
+          const isWS = (s.invoice_no && s.invoice_no.startsWith("WS-")) || (s.note && s.note.includes("WHOLESALE"));
+          const d = new Date(s.created_at || Date.now());
+          const dateStr = d.toLocaleDateString("en-IN") + " " + d.toLocaleTimeString("en-US", { hour: '2-digit', minute:'2-digit' });
+
+          // CLEAN ENTRY: TRASH BUTTON REMOVED
+          return `
+            <div class="py-2.5 flex items-center justify-between hover:bg-indigo-600/5 px-2 rounded-xl transition">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-xs text-indigo-400 font-mono">${s.invoice_no}</span>
+                  <span class="text-[9px] px-2 py-0.5 rounded font-bold font-mono ${isWS ? 'bg-purple-600/20 text-purple-300 border border-purple-500/40' : 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/40'}">
+                    ${isWS ? 'WHOLESALE' : 'RETAIL'}
+                  </span>
+                  <span class="text-[10px] ui-subtext font-semibold">${s.items ? s.items.length : 1} item(s)</span>
+                </div>
+                <p class="text-[10px] ui-subtext mt-0.5">${dateStr} • <strong style="color: var(--text-main)">${s.customer_name || 'Buyer'}</strong> (${s.mode})</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-xs font-mono text-emerald-400 mr-2">₹${parseFloat(s.total).toFixed(2)}</span>
+                <button onclick="viewInvoiceDetails(${index})" class="px-2.5 py-1 rounded-lg bg-indigo-600/15 text-indigo-400 hover:bg-indigo-600 hover:text-white transition text-[11px] font-bold cursor-pointer">View</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    };
+
+    window.viewInvoiceDetails = function(index) {
+      const inv = window.sales[index];
+      if (!inv) return;
+      window.activeDetailInvoice = inv;
+      const d = new Date(inv.created_at || Date.now()).toLocaleString('en-IN');
+      const isWS = (inv.invoice_no && inv.invoice_no.startsWith("WS-")) || (inv.note && inv.note.includes("WHOLESALE"));
+
+      document.getElementById('detail-invoice-no').innerText = inv.invoice_no;
+      document.getElementById('detail-invoice-date').innerText = d;
+      document.getElementById('detail-cust-name').innerText = inv.customer_name || '-';
+      document.getElementById('detail-bill-category').innerText = isWS ? 'WHOLESALE (BULK)' : 'RETAIL COUNTER';
+      document.getElementById('detail-pay-mode').innerText = inv.mode;
+      document.getElementById('detail-total-amount').innerText = `₹${parseFloat(inv.total).toFixed(2)}`;
+
+      const itemsContainer = document.getElementById('detail-items-list');
+      if (!inv.items || inv.items.length === 0) {
+        itemsContainer.innerHTML = '<p class="text-xs ui-subtext p-3 text-center">No item records found.</p>';
+      } else {
+        itemsContainer.innerHTML = inv.items.map(item => `
+          <div class="p-2.5 flex items-center justify-between text-xs">
+            <div>
+              <p class="font-bold" style="color: var(--text-main)">${item.name} <span class="text-indigo-400">(${item.size || 'Free'})</span></p>
+              <span class="text-[10px] ui-subtext font-mono font-medium">₹${parseFloat(item.price).toFixed(2)} × ${item.qty} pcs</span>
+            </div>
+            <span class="font-bold font-mono text-emerald-400">₹${parseFloat(item.total || (item.price * item.qty)).toFixed(2)}</span>
+          </div>
+        `).join('');
+      }
+
+      document.getElementById('modal-invoice-detail').classList.remove('hidden');
+    };
+
+    window.closeInvoiceModal = function() {
+      document.getElementById('modal-invoice-detail').classList.add('hidden');
+    };
+
+    window.reprintActiveInvoice = function() {
+      if (window.activeDetailInvoice) {
+        const inv = window.activeDetailInvoice;
+        window.executeDirectPrint({
+          invoiceNo: inv.invoice_no,
+          billMode: (inv.invoiceNo && inv.invoiceNo.startsWith("WS-")) ? "WHOLESALE" : "RETAIL",
+          dateTime: new Date(inv.created_at).toLocaleString('en-IN'),
+          customer: inv.customer_name,
+          phone: inv.customer_phone,
+          mode: inv.mode,
+          note: inv.note,
+          total: inv.total,
+          items: inv.items
+        });
+      }
+    };
+
+    // SUPER ADMIN MANAGEMENT (STRICT GARMENTS FILTER)
+    window.promptSuperAdminAccess = function() {
+      const email = prompt("Enter Master Admin Email:");
+      if (!email) return;
+      const pass = prompt("Enter Master Admin Password:");
+      if (email.trim() === SUPER_ADMIN_EMAIL && pass === SUPER_ADMIN_PASS) {
+        openSuperAdminPanel();
+      } else {
+        alert("Access Denied: Invalid Master Admin Credentials.");
+      }
+    };
+
+    window.openSuperAdminPanel = function() {
+      document.getElementById("modal-super-admin").classList.remove("hidden");
+      loadAdminStores();
+    };
+
+    window.exitAdminPanel = function() {
+      document.getElementById("modal-super-admin").classList.add("hidden");
+      if (window.currentStore) {
+        bootStoreSession();
+      } else {
+        document.getElementById("auth-modal").classList.remove("hidden");
+      }
+    };
+
+    window.loadAdminStores = async function() {
+      const tbody = document.getElementById("admin-stores-table-body");
+      tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center ui-subtext">Fetching garments stores from cloud...</td></tr>`;
+
+      const { data: stores, error } = await client
+        .from("stores")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error || !stores || !stores.length) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center ui-subtext">No stores registered yet.</td></tr>`;
+        return;
+      }
+
+      // Filter: Strictly garments stores only
+      const garmentsStores = stores.filter(st => st.plan_type && st.plan_type.toUpperCase().includes("GARMENT"));
+
+      if (garmentsStores.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center ui-subtext">No garments stores registered yet.</td></tr>`;
+        return;
+      }
+
+      window.adminStoresCache = garmentsStores;
+
+      tbody.innerHTML = garmentsStores.map(st => {
+        const d = new Date(st.expires_at || Date.now());
+        const dateStr = d.toLocaleDateString("en-GB", { day: '2-digit', month: 'short', year: 'numeric' }) + " " + d.toLocaleTimeString("en-US", { hour: '2-digit', minute:'2-digit', hour12:true });
+        const isSuspended = st.status === "SUSPENDED";
+        const loginStr = st.last_login_at 
+          ? new Date(st.last_login_at).toLocaleDateString("en-IN") + " " + new Date(st.last_login_at).toLocaleTimeString("en-US", { hour: '2-digit', minute:'2-digit', hour12:true }).toLowerCase() 
+          : "Never";
+
+        return `
+          <tr class="hover:bg-indigo-600/5 transition">
+            <td class="px-4 py-3">
+              <span class="font-bold block text-sm" style="color: var(--text-main)">${st.store_name}</span>
+              <span class="text-[10px] ui-subtext font-mono block">${st.owner_email} • ${st.owner_phone || 'No phone'}</span>
+              <span class="text-[10px] text-indigo-400 font-mono block">Pass: <strong>${st.password || 'Not Set'}</strong></span>
+              <span class="text-[10px] text-amber-400 font-mono font-semibold block mt-0.5">🕒 Last: ${loginStr}</span>
+            </td>
+            <td class="px-3 py-3">
+              ${st.reset_otp ? `<span class="px-2 py-1 bg-amber-500/20 text-amber-400 border border-amber-500/40 rounded-lg font-mono font-bold text-xs">${st.reset_otp}</span>` : `<span class="ui-subtext text-[10px]">None</span>`}
+            </td>
+            <td class="px-3 py-3">
+              <input type="text" value="${st.plan_type || '₹299/mo'}" id="admin-fee-${st.id}" class="form-input text-xs w-20 font-bold font-mono py-1">
+            </td>
+            <td class="px-3 py-3">
+              <span class="text-[10px] px-2.5 py-0.5 rounded-full font-bold ${isSuspended ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'}">
+                ${st.status}
+              </span>
+            </td>
+            <td class="px-3 py-3 font-mono font-bold text-[11px]" style="color: var(--text-main)">
+              ${dateStr}
+            </td>
+            <td class="px-4 py-3 text-right space-x-1.5 whitespace-nowrap">
+              <button onclick="openCustomExpiryModal('${st.id}')" class="px-2.5 py-1 rounded-lg bg-purple-600/25 text-purple-300 border border-purple-500/40 hover:bg-purple-600 hover:text-white transition text-[11px] font-bold">
+                📅 Set Date/Time
+              </button>
+              <button onclick="adminDirectResetPassword('${st.id}')" class="px-2.5 py-1 rounded-lg bg-amber-600/20 text-amber-400 border border-amber-500/30 text-[11px] font-bold">
+                ⚡ Pass
+              </button>
+              <button onclick="adminToggleStatus('${st.id}', '${st.status}')" class="px-2.5 py-1 rounded-lg ${isSuspended ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-600/20 text-rose-400 border border-rose-500/30'} text-[11px] font-bold">
+                ${isSuspended ? 'Active' : 'Suspend'}
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    };
+
+    window.openCustomExpiryModal = function(storeId) {
+      window.activeExpiryStoreId = storeId;
+      const st = (window.adminStoresCache || []).find(s => String(s.id) === String(storeId));
+      const storeName = st ? st.store_name : "Store";
+      document.getElementById("custom-expiry-store-name").innerText = storeName;
+
+      let d = new Date();
+      if (st && st.expires_at) {
+        const parsed = new Date(st.expires_at);
+        if (!isNaN(parsed.getTime())) d = parsed;
+      }
+
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const hours = String(d.getHours()).padStart(2, '0');
+      const minutes = String(d.getMinutes()).padStart(2, '0');
+      
+      document.getElementById("custom-expiry-input").value = `${year}-${month}-${day}T${hours}:${minutes}`;
+      document.getElementById("modal-custom-expiry").classList.remove("hidden");
+    };
+
+    window.closeCustomExpiryModal = function() {
+      document.getElementById("modal-custom-expiry").classList.add("hidden");
+    };
+
+    window.commitCustomExpiry = async function() {
+      const val = document.getElementById("custom-expiry-input").value;
+      if (!val) return alert("Valid Date aur Time select karein!");
+
+      const selectedDate = new Date(val);
+      if (isNaN(selectedDate.getTime())) return alert("Valid Date aur Time dalein!");
+
+      const isoDate = selectedDate.toISOString();
+      const { error } = await client.from("stores").update({ expires_at: isoDate, status: "ACTIVE" }).eq("id", window.activeExpiryStoreId);
+
+      if (error) return alert("Database Error: " + error.message);
+
+      alert(`✅ Validity update ho gayi!\nNayi Expiry: ${selectedDate.toLocaleString('en-IN')}`);
+      window.closeCustomExpiryModal();
+      loadAdminStores();
+    };
+
+    window.adminDirectResetPassword = async function(storeId) {
+      const st = (window.adminStoresCache || []).find(s => String(s.id) === String(storeId));
+      const storeName = st ? st.store_name : "Store";
+      const newPass = prompt(`'${storeName}' ka naya password enter karein:`, "123456");
+      if (!newPass) return;
+
+      await client.from("stores").update({ password: newPass, reset_otp: null }).eq("id", storeId);
+      alert(`✅ Password updated to: ${newPass}`);
+      loadAdminStores();
+    };
+
+    window.adminToggleStatus = async function(storeId, currentStatus) {
+      const nextStatus = currentStatus === "SUSPENDED" ? "ACTIVE" : "SUSPENDED";
+      await client.from("stores").update({ status: nextStatus }).eq("id", storeId);
+      loadAdminStores();
+    };
+
+    // MODALS & HELPERS
+    window.openAddProductModal = function() {
+      window.activeEditId = null;
+      document.getElementById('editor-title').innerText = 'Add Garment Item';
+      document.getElementById('prod-sku').value = 'CLOTH-' + Math.floor(1000 + Math.random() * 9000);
+      document.getElementById('prod-barcode').value = '';
+      document.getElementById('prod-name').value = '';
+      document.getElementById('prod-category').value = "Men's Wear";
+      document.getElementById('prod-size').value = 'L';
+      document.getElementById('prod-cost').value = '';
+      document.getElementById('prod-price').value = '';
+      document.getElementById('prod-wholesale-price').value = '';
+      document.getElementById('prod-stock').value = '';
+      toggleModal('modal-product-editor');
+    };
+
+    window.toggleModal = function(id) {
+      document.getElementById(id).classList.toggle('hidden');
+    };
+
+    window.openForgotModal = function() {
+      document.getElementById("modal-forgot-password").classList.remove("hidden");
+      document.getElementById("forgot-step-1").classList.remove("hidden");
+      document.getElementById("forgot-step-2").classList.add("hidden");
+      document.getElementById("forgot-email").value = "";
+      document.getElementById("forgot-otp").value = "";
+      document.getElementById("forgot-new-pass").value = "";
+      document.getElementById("forgot-err-msg").innerText = "";
+    };
+
+    window.closeForgotModal = function() {
+      document.getElementById("modal-forgot-password").classList.add("hidden");
+    };
+
+    window.resetForgotSteps = function() {
+      document.getElementById("forgot-step-1").classList.remove("hidden");
+      document.getElementById("forgot-step-2").classList.add("hidden");
+      document.getElementById("forgot-err-msg").innerText = "";
+    };
+
+    window.sendOtpCode = async function() {
+      const email = document.getElementById("forgot-email").value.trim().toLowerCase();
+      const err = document.getElementById("forgot-err-msg");
+      err.innerText = "";
+
+      if (!email) {
+        err.innerText = "Email daalna zaroori hai!";
+        return;
+      }
+
+      const { data: store, error } = await client.from("stores").select("*").eq("owner_email", email).maybeSingle();
+      if (error || !store || !store.plan_type || !store.plan_type.toUpperCase().includes("GARMENT")) {
+        err.innerText = "Yeh email garments me register nahi hai.";
+        return;
+      }
+
+      window.activeResetEmail = email;
+      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+      await client.from("stores").update({ reset_otp: otpCode }).eq("id", store.id);
+
+      try {
+        if (window.emailjs && EMAILJS_SERVICE_ID !== "service_martflow") {
+          await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+            to_email: email,
+            store_name: store.store_name,
+            otp_code: otpCode
+          }, EMAILJS_PUBLIC_KEY);
+        }
+      } catch (e) {}
+
+      document.getElementById("forgot-step-1").classList.add("hidden");
+      document.getElementById("forgot-step-2").classList.remove("hidden");
+      document.getElementById("forgot-status-text").innerText = `OTP sent!`;
+    };
+
+    window.verifyOtpAndChangePassword = async function() {
+      const enteredOtp = document.getElementById("forgot-otp").value.trim();
+      const newPass = document.getElementById("forgot-new-pass").value;
+      const err = document.getElementById("forgot-err-msg");
+      err.innerText = "";
+
+      if (!enteredOtp || enteredOtp.length !== 6) return err.innerText = "6-digit OTP code enter karein.";
+      if (!newPass || newPass.length < 4) return err.innerText = "Naya password kam se kam 4 aksharon ka hona chahiye.";
+
+      const { data: store, error } = await client.from("stores").select("*").eq("owner_email", window.activeResetEmail).single();
+      if (error || !store) return err.innerText = "Store record nahi mila.";
+
+      if (store.reset_otp !== enteredOtp) return err.innerText = "Galat OTP! Sahi code enter karein.";
+
+      await client.from("stores").update({ password: newPass, reset_otp: null }).eq("id", store.id);
+      alert("🎉 Password badal gaya! Login ho raha hai.");
+
+      store.password = newPass;
+      window.currentStore = store;
+      localStorage.setItem("martflow_garments_isolated_session", JSON.stringify(store));
+      closeForgotModal();
+      document.getElementById("auth-modal").classList.add("hidden");
+      bootStoreSession();
+    };
+
+    window.toggleTheme = function() {
+      window.currentTheme = window.currentTheme === 'light' ? 'dark' : 'light';
+      localStorage.setItem('mf_garments_theme', window.currentTheme);
+      document.body.className = `theme-${window.currentTheme} min-h-screen flex flex-col pb-16 select-none`;
+      document.getElementById('theme-btn-icon').innerText = window.currentTheme === 'dark' ? '☀️' : '🌙';
+      renderSales();
+    };
+
+    window.switchView = function(view) {
+      ['billing', 'inventory', 'sales', 'settings'].forEach(v => {
+        document.getElementById(`view-${v}`).classList.add('hidden');
+        const b = document.getElementById(`tab-btn-${v}`);
+        b.className = 'px-3.5 py-1.5 rounded-xl text-xs nav-tab-inactive whitespace-nowrap transition';
+      });
+
+      const active = document.getElementById(`view-${view}`);
+      active.classList.remove('hidden');
+
+      const activeBtn = document.getElementById(`tab-btn-${view}`);
+      activeBtn.className = 'px-3.5 py-1.5 rounded-xl text-xs nav-tab-active whitespace-nowrap transition';
+
+      if (view === 'inventory') renderInventory();
+      if (view === 'sales') renderSales();
+    };
+
+    window.saveStoreSettings = function() {
+      window.storeConfig = {
+        name: document.getElementById('setting-store-name').value.trim() || 'Mustak Garments',
+        address: document.getElementById('setting-store-address').value.trim(),
+        phone: document.getElementById('setting-store-phone').value.trim(),
+        gstin: document.getElementById('setting-store-gst').value.trim(),
+        currency: '₹',
+        upi: document.getElementById('setting-store-upi').value.trim() || 'garments@upi',
+        header: document.getElementById('setting-receipt-header').value.trim() || 'MUSTAK GARMENTS',
+        footer: document.getElementById('setting-receipt-footer').value.trim() || 'Thank you for shopping with us!',
+        policy: document.getElementById('setting-receipt-policy').value.trim() || 'Exchange within 7 days with tag intact.',
+        splitTax: document.getElementById('setting-tax-split').checked
+      };
+      localStorage.setItem('mf_garments_store_config', JSON.stringify(window.storeConfig));
+      alert('Garments store settings saved successfully!');
+    };
+
+    window.changeStorePassword = async function() {
+      const currentPass = document.getElementById("change-current-pass").value;
+      const newPass = document.getElementById("change-new-pass").value;
+      const confirmPass = document.getElementById("change-confirm-pass").value;
+
+      if (!window.currentStore) return alert("Pehle login karein!");
+      if (window.currentStore.password && window.currentStore.password !== currentPass) {
+        return alert("Purana Password galat hai!");
+      }
+      if (!newPass || newPass.length < 4) return alert("Naya password kam se kam 4 aksharon ka hona chahiye!");
+      if (newPass !== confirmPass) return alert("Naya Password aur Confirm Password match nahi ho rahe!");
+
+      const { error } = await client.from("stores").update({ password: newPass }).eq("id", window.currentStore.id);
+      if (error) return alert("Password update fail hua: " + error.message);
+
+      window.currentStore.password = newPass;
+      localStorage.setItem("martflow_garments_isolated_session", JSON.stringify(window.currentStore));
+
+      document.getElementById("change-current-pass").value = "";
+      document.getElementById("change-new-pass").value = "";
+      document.getElementById("change-confirm-pass").value = "";
+
+      alert("🎉 Password update ho gaya!");
+    };
+
+    window.exportCSV = function() {
+      let csv = "SKU,Product Name,Category,Size,Cost,Retail Price,Wholesale Price,Stock Pcs\n";
+      window.products.forEach(p => {
+        csv += `"${p.sku || ''}","${p.name}","${p.category || ''}","${p.size || 'Free'}",${p.cost || 0},${p.price},${p.wholesale_price || p.price},${p.stock || 0}\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.setAttribute('href', url);
+      a.setAttribute('download', 'garments_inventory.csv');
+      a.click();
+    };
+
+    window.doLogout = function() {
+      localStorage.removeItem("martflow_garments_isolated_session");
+      location.reload();
+    };
+
+    window.onload = function() {
+      const clockEl = document.getElementById('current-clock');
+      setInterval(() => {
+        clockEl.innerText = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+      }, 1000);
+
+      setInterval(() => {
+        if (window.currentStore) {
+          const expiry = new Date(window.currentStore.expires_at || Date.now());
+          if (new Date() > expiry) {
+            window.doLogout();
+          }
+        }
+      }, 60000);
+
+      const savedStore = localStorage.getItem("martflow_garments_isolated_session");
+      if (savedStore) {
+        window.currentStore = JSON.parse(savedStore);
+        document.getElementById("auth-modal").classList.add("hidden");
+        bootStoreSession();
+      } else {
+        document.getElementById("auth-modal").classList.remove("hidden");
+        window.switchAuthView("STORE_REG");
+      }
+    };
+  </script>
+</body>
+</html>
