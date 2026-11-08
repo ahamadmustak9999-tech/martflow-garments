@@ -354,7 +354,7 @@
     </div>
   </div>
 
-  <!-- Header -->
+  <!-- Header (CUSTOM DUKAN NAME + BRANDING) -->
   <header class="custom-card sticky top-0 z-30 px-4 py-2.5 flex items-center justify-between border-b shadow-sm">
     <div class="flex items-center gap-3">
       <div class="h-8 w-8 bg-indigo-600 rounded-xl flex items-center justify-center font-bold text-white text-xs shadow-md shadow-indigo-500/30">
@@ -362,19 +362,21 @@
       </div>
       <div>
         <div class="flex items-center gap-2">
+          <!-- DUKANDAR KA APNA CUSTOM SHOP NAME -->
           <h1 class="font-bold text-sm tracking-tight flex items-center gap-1.5" style="color: var(--text-main)">
             <span id="header-store-display">Garments Store</span>
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border" 
-                  style="background-color: var(--badge-retail-bg); color: var(--badge-retail-txt); border-color: var(--badge-retail-border)">
-              Garments OS
-            </span>
           </h1>
           <span class="text-[10px] font-bold flex items-center gap-1 px-2.5 py-0.5 rounded-full border"
                 style="background-color: var(--badge-reg-bg); color: var(--badge-reg-txt); border-color: var(--badge-reg-border)">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> <span id="header-plan-display">Active</span>
           </span>
         </div>
-        <p class="ui-subtext" id="current-clock">Loading...</p>
+        <!-- WEBSITE BRAND NAME + LIVE CLOCK -->
+        <div class="flex items-center gap-1.5 mt-0.5">
+          <span class="text-[10px] text-indigo-400 font-bold tracking-tight">MartFlow Garments & Wholesale</span>
+          <span class="ui-subtext">•</span>
+          <p class="ui-subtext" id="current-clock">Loading...</p>
+        </div>
       </div>
     </div>
 
@@ -509,7 +511,7 @@
       </div>
     </div>
 
-    <!-- 2. INVENTORY MASTER VIEW (CLEAN - NO DELETE BUTTON) -->
+    <!-- 2. INVENTORY MASTER VIEW (NO DELETE BUTTON) -->
     <div id="view-inventory" class="hidden space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
@@ -561,7 +563,7 @@
       </div>
     </div>
 
-    <!-- 3. SALES LEDGER VIEW (CLEAN - AUTO PURGE TEXT & DELETE BUTTON REMOVED) -->
+    <!-- 3. SALES LEDGER VIEW (CLEAN - NO PURGE TEXT / NO DELETE BUTTON) -->
     <div id="view-sales" class="hidden space-y-3">
       <div class="grid grid-cols-3 gap-2 text-center">
         <div class="custom-card p-3 rounded-2xl shadow-sm">
@@ -589,12 +591,12 @@
       </div>
     </div>
 
-    <!-- 4. STORE SETTINGS VIEW -->
+    <!-- 4. STORE SETTINGS VIEW (CUSTOM SHOP NAME EDITABLE) -->
     <div id="view-settings" class="hidden space-y-4 max-w-2xl mx-auto">
       <div class="flex items-center justify-between">
         <div>
           <h2 class="text-lg font-bold" style="color: var(--text-main)">Garments Store Settings</h2>
-          <p class="ui-subtext">Shop branding, GSTIN, thermal receipt details and security.</p>
+          <p class="ui-subtext">Dukan ka naam, address, tax ID aur branding yahan badlein.</p>
         </div>
         <button onclick="saveStoreSettings()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-indigo-600/30">
           💾 Save settings
@@ -608,12 +610,12 @@
         </div>
         <div class="space-y-3 text-xs">
           <div>
-            <label class="block ui-label mb-1">Shop Name *</label>
-            <input type="text" id="setting-store-name" class="w-full form-input font-medium" placeholder="Mustak Cloth Store">
+            <label class="block ui-label mb-1">Shop Name * (Yahi naam header me dikhega)</label>
+            <input type="text" id="setting-store-name" class="w-full form-input font-bold text-sm text-indigo-400" placeholder="Apni dukan ka naam likhein...">
           </div>
           <div>
             <label class="block ui-label mb-1">Address</label>
-            <textarea id="setting-store-address" rows="2" class="w-full form-input resize-none font-medium" placeholder="Main Textile Market, Jangipur, West Bengal..."></textarea>
+            <textarea id="setting-store-address" rows="2" class="w-full form-input resize-none font-medium" placeholder="Main Market, Road No. 1..."></textarea>
           </div>
           <div class="grid grid-cols-2 gap-2">
             <div>
@@ -640,7 +642,7 @@
         <div class="space-y-3 text-xs">
           <div>
             <label class="block ui-label mb-1">Receipt Title Header</label>
-            <input type="text" id="setting-receipt-header" class="w-full form-input font-medium" placeholder="MUSTAK CLOTH STORE">
+            <input type="text" id="setting-receipt-header" class="w-full form-input font-medium" placeholder="SHOP NAME FOR RECEIPT">
           </div>
           <div>
             <label class="block ui-label mb-1">Exchange Policy / Terms</label>
@@ -891,13 +893,13 @@
     window.activeExpiryStoreId = null;
 
     window.storeConfig = {
-      name: 'Mustak Garments & Wholesale',
+      name: '',
       address: 'Main Textile Market, Jangipur, Murshidabad',
       phone: '+91 98220 11223',
       gstin: '19ABCDE1234F1Z5',
       currency: '₹',
       upi: 'garments@upi',
-      header: 'MUSTAK GARMENTS & WHOLESALE',
+      header: '',
       footer: 'Thank you for shopping with us!',
       policy: 'Exchange within 7 days with tag intact.',
       splitTax: true
@@ -1002,7 +1004,7 @@
       bootStoreSession();
     };
 
-    // 2. STORE REGISTER
+    // 2. STORE REGISTER (DYNAMIC SHOP NAME APPLIED)
     window.submitStoreRegister = async function() {
       const name = document.getElementById("store-reg-name").value.trim();
       const phone = document.getElementById("store-reg-phone").value.trim();
@@ -1040,6 +1042,11 @@
         err.innerText = "Registration error: " + error.message;
         return;
       }
+
+      // Initialize default shop config with dukandar's chosen name
+      window.storeConfig.name = name;
+      window.storeConfig.header = name;
+      localStorage.setItem('mf_garments_store_config', JSON.stringify(window.storeConfig));
 
       window.currentStore = data;
       localStorage.setItem("martflow_garments_isolated_session", JSON.stringify(data));
@@ -1128,17 +1135,19 @@
       }
       const cfg = window.storeConfig || {};
 
-      document.getElementById("header-store-display").innerText = window.currentStore.store_name;
+      // Dynamic Dukandar Shop Name (Pehle user ki dukan ka naam, warna registered naam)
+      const currentShopName = cfg.name || window.currentStore.store_name || "Garments Store";
+      document.getElementById("header-store-display").innerText = currentShopName;
       document.getElementById("header-plan-display").innerText = `${daysLeft}d Left`;
 
       if (document.getElementById("setting-store-name")) {
-        document.getElementById("setting-store-name").value = cfg.name || window.currentStore.store_name || "Mustak Garments";
+        document.getElementById("setting-store-name").value = currentShopName;
         document.getElementById("setting-store-address").value = cfg.address || "";
         document.getElementById("setting-store-phone").value = cfg.phone || window.currentStore.owner_phone || "+91 98220 11223";
         document.getElementById("setting-store-gst").value = cfg.gstin || "19ABCDE1234F1Z5";
         document.getElementById("setting-store-upi").value = cfg.upi || "garments@upi";
 
-        document.getElementById("setting-receipt-header").value = cfg.header || window.currentStore.store_name || "MUSTAK GARMENTS";
+        document.getElementById("setting-receipt-header").value = cfg.header || currentShopName;
         document.getElementById("setting-receipt-footer").value = cfg.footer || "Thank you for shopping with us!";
         document.getElementById("setting-receipt-policy").value = cfg.policy || "Exchange within 7 days with tag intact.";
         document.getElementById("setting-tax-split").checked = cfg.splitTax !== false;
@@ -1204,7 +1213,6 @@
         const wholesalePrice = p.wholesale_price || (p.price * 0.85);
         const isLow = (p.stock || 0) <= 5;
 
-        // NOTE: DELETE BUTTON REMOVED PERMANENTLY FOR ANTI-THEFT
         return `
           <tr class="hover:bg-indigo-600/5 transition">
             <td class="px-4 py-3">
@@ -1332,7 +1340,6 @@
     async function loadCloudSales() {
       if (!window.currentStore) return;
 
-      // SILENT CLEANUP: 6 Months (180 days) se purane sabhi bills automatically delete honge
       const sixMonthsAgo = new Date();
       sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
       const cutoffDate = sixMonthsAgo.toISOString();
@@ -1345,7 +1352,6 @@
           .lt("created_at", cutoffDate);
       } catch (e) {}
 
-      // Fetch fresh active bills
       const { data } = await client
         .from("sales")
         .select("*")
@@ -1622,9 +1628,11 @@
       const cgst = (taxAmount / 2).toFixed(2);
       const sgst = (taxAmount / 2).toFixed(2);
 
+      const printShopName = cfg.header || cfg.name || (window.currentStore ? window.currentStore.store_name : 'GARMENTS STORE');
+
       printDiv.innerHTML = `
         <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 5px; margin-bottom: 5px;">
-          <h2 style="font-size: 14px; margin: 0; font-weight: bold; color: #000;">${cfg.header || (window.currentStore ? window.currentStore.store_name : 'GARMENTS STORE')}</h2>
+          <h2 style="font-size: 14px; margin: 0; font-weight: bold; color: #000;">${printShopName}</h2>
           <div style="font-size: 10px; font-weight: bold; margin: 2px 0;">[${isWholesale ? 'WHOLESALE TAX INVOICE' : 'RETAIL INVOICE'}]</div>
           ${cfg.address ? `<p style="margin: 2px 0; font-size: 9px; color: #000;">${cfg.address}</p>` : ''}
           ${cfg.phone || (window.currentStore && window.currentStore.owner_phone) ? `<p style="margin: 2px 0; font-size: 9px; color: #000;">Phone: ${cfg.phone || window.currentStore.owner_phone}</p>` : ''}
@@ -1680,13 +1688,14 @@
         <div style="text-align: center; margin-top: 8px; font-size: 9px; color: #000; border-top: 1px dashed #000; padding-top: 4px;">
           <p style="margin: 2px 0 0 0;">${cfg.policy || 'Exchange within 7 days with tag intact.'}</p>
           <p style="margin: 2px 0 0 0;">${cfg.footer || 'Thank you for shopping with us!'}</p>
+          <p style="margin: 4px 0 0 0; font-size: 8px; color: #555;">Powered by MartFlow Garments & Wholesale</p>
         </div>
       `;
 
       setTimeout(() => { window.print(); }, 50);
     };
 
-    // SALES LEDGER (CLEAN - NO DELETE BUTTON BESIDE BILL)
+    // SALES LEDGER
     window.renderSales = function() {
       document.getElementById('stat-total-bills').innerText = window.sales.length;
       const total = window.sales.reduce((a, s) => a + parseFloat(s.total || 0), 0);
@@ -1705,7 +1714,6 @@
           const d = new Date(s.created_at || Date.now());
           const dateStr = d.toLocaleDateString("en-IN") + " " + d.toLocaleTimeString("en-US", { hour: '2-digit', minute:'2-digit' });
 
-          // CLEAN ENTRY: TRASH BUTTON REMOVED
           return `
             <div class="py-2.5 flex items-center justify-between hover:bg-indigo-600/5 px-2 rounded-xl transition">
               <div>
@@ -1821,7 +1829,6 @@
         return;
       }
 
-      // Filter: Strictly garments stores only
       const garmentsStores = stores.filter(st => st.plan_type && st.plan_type.toUpperCase().includes("GARMENT"));
 
       if (garmentsStores.length === 0) {
@@ -2062,21 +2069,35 @@
       if (view === 'sales') renderSales();
     };
 
-    window.saveStoreSettings = function() {
+    // DYNAMIC SHOP NAME SAVING (UPDATES DATABASE & HEADER INSTANTLY)
+    window.saveStoreSettings = async function() {
+      const newShopName = document.getElementById('setting-store-name').value.trim() || 'Garments Store';
+      
       window.storeConfig = {
-        name: document.getElementById('setting-store-name').value.trim() || 'Mustak Garments',
+        name: newShopName,
         address: document.getElementById('setting-store-address').value.trim(),
         phone: document.getElementById('setting-store-phone').value.trim(),
         gstin: document.getElementById('setting-store-gst').value.trim(),
         currency: '₹',
         upi: document.getElementById('setting-store-upi').value.trim() || 'garments@upi',
-        header: document.getElementById('setting-receipt-header').value.trim() || 'MUSTAK GARMENTS',
+        header: document.getElementById('setting-receipt-header').value.trim() || newShopName,
         footer: document.getElementById('setting-receipt-footer').value.trim() || 'Thank you for shopping with us!',
         policy: document.getElementById('setting-receipt-policy').value.trim() || 'Exchange within 7 days with tag intact.',
         splitTax: document.getElementById('setting-tax-split').checked
       };
       localStorage.setItem('mf_garments_store_config', JSON.stringify(window.storeConfig));
-      alert('Garments store settings saved successfully!');
+
+      // Header me shop name turant badal do
+      document.getElementById('header-store-display').innerText = newShopName;
+
+      // Supabase cloud database me bhi dukan ka naya naam save karo
+      if (window.currentStore) {
+        window.currentStore.store_name = newShopName;
+        localStorage.setItem("martflow_garments_isolated_session", JSON.stringify(window.currentStore));
+        await client.from("stores").update({ store_name: newShopName }).eq("id", window.currentStore.id);
+      }
+
+      alert('✅ Garments shop name aur settings update ho gayi!');
     };
 
     window.changeStorePassword = async function() {
