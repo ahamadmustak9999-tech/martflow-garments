@@ -511,12 +511,12 @@
       </div>
     </div>
 
-    <!-- 2. INVENTORY MASTER VIEW (NO DELETE BUTTON) -->
+    <!-- 2. INVENTORY MASTER VIEW (EXACT ACTIONS: ADJUST, EDIT, DELETE) -->
     <div id="view-inventory" class="hidden space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 class="text-lg font-bold" style="color: var(--text-main)">Garments Inventory Master</h2>
-          <p class="ui-subtext">Stock management with Retail, Wholesale rates (Protected against deletion).</p>
+          <p class="ui-subtext">Stock management with Retail, Wholesale rates and delete control.</p>
         </div>
         <div class="flex items-center gap-2">
           <button onclick="exportCSV()" class="px-3 py-1.5 rounded-xl custom-card text-xs font-bold transition hover:border-indigo-500" style="color: var(--text-main)">↓ Export CSV</button>
@@ -553,7 +553,8 @@
                 <th class="px-3 py-3 font-bold">Category</th>
                 <th class="px-3 py-3 font-bold">Retail Rate</th>
                 <th class="px-3 py-3 font-bold">Wholesale Rate</th>
-                <th class="px-3 py-3 font-bold">Stock (Pcs)</th>
+                <th class="px-3 py-3 font-bold">Stock</th>
+                <th class="px-3 py-3 font-bold">Stock Value</th>
                 <th class="px-4 py-3 text-right font-bold">Actions</th>
               </tr>
             </thead>
@@ -563,7 +564,7 @@
       </div>
     </div>
 
-    <!-- 3. SALES LEDGER VIEW (CLEAN - NO PURGE TEXT / NO DELETE BUTTON) -->
+    <!-- 3. SALES LEDGER VIEW (SEARCHABLE BY NAME / PHONE / INVOICE) -->
     <div id="view-sales" class="hidden space-y-3">
       <div class="grid grid-cols-3 gap-2 text-center">
         <div class="custom-card p-3 rounded-2xl shadow-sm">
@@ -577,6 +578,15 @@
         <div class="custom-card p-3 rounded-2xl shadow-sm">
           <p class="ui-label">Total Revenue</p>
           <h4 id="stat-total-amount" class="text-base font-bold font-mono text-emerald-400 mt-0.5">₹0.00</h4>
+        </div>
+      </div>
+
+      <!-- SALES SEARCH BOX -->
+      <div class="custom-card rounded-2xl p-3 shadow-sm border" style="border-color: var(--border-color)">
+        <div class="relative">
+          <input type="text" id="sales-search-input" placeholder="Search bills by Customer Name, Mobile Number, or Invoice No..." 
+            class="w-full form-input pl-8 text-xs font-medium" autocomplete="off" oninput="renderSales()">
+          <span class="absolute left-2.5 top-2.5 text-xs" style="color: var(--text-muted)">🔍</span>
         </div>
       </div>
 
@@ -860,7 +870,6 @@
     const SUPABASE_ANON_KEY = "sb_publishable_6uFSLPyZ6w-VXAhkXgL5uA_cvFJO73C";
     const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // EXACT SUPER ADMIN CREDENTIALS
     const SUPER_ADMIN_EMAIL = "mtkahamad1@gmail.com";
     const SUPER_ADMIN_PASS = "@MUSTAKAHAMAD9332";
 
@@ -868,10 +877,8 @@
     const EMAILJS_TEMPLATE_ID = "template_martflow_otp";
     const EMAILJS_PUBLIC_KEY = "user_martflow_public";
 
-    // GARMENTS SPECIFIC PLAN IDENTIFIER
     const GARMENTS_PLAN_PREFIX = "GARMENTS_TRIAL";
 
-    // DEFAULT PRE-LOADED CLOTHES
     const DEFAULT_GARMENTS = [
       { id: "g1", name: "Formal Cotton Shirt", category: "Men's Wear", size: "L", sku: "MSH-01", price: 549, wholesale_price: 380, cost: 300, stock: 24 },
       { id: "g2", name: "Slim Fit Stretch Jeans", category: "Men's Wear", size: "32", sku: "MJN-02", price: 899, wholesale_price: 620, cost: 500, stock: 18 },
@@ -910,7 +917,6 @@
     window.activeEditId = null;
     window.activeDetailInvoice = null;
 
-    // ZERO PRE-FILL INITIALIZER
     window.clearAllAuthInputs = function() {
       document.getElementById("store-login-email").value = "";
       document.getElementById("store-login-pass").value = "";
@@ -976,7 +982,7 @@
 
       const isGarmentStore = data.plan_type && data.plan_type.toUpperCase().includes("GARMENT");
       if (!isGarmentStore) {
-        err.innerText = "Yeh MartFlow Grocery ka account hai! Garments ke liye alag se 'Register' karein.";
+        err.innerText = "Yeh account garments store me registered nahi hai! Garments ke liye alag se 'Register' karein.";
         return;
       }
 
@@ -1004,7 +1010,7 @@
       bootStoreSession();
     };
 
-    // 2. STORE REGISTER (DYNAMIC SHOP NAME APPLIED)
+    // 2. STORE REGISTER
     window.submitStoreRegister = async function() {
       const name = document.getElementById("store-reg-name").value.trim();
       const phone = document.getElementById("store-reg-phone").value.trim();
@@ -1043,7 +1049,6 @@
         return;
       }
 
-      // Initialize default shop config with dukandar's chosen name
       window.storeConfig.name = name;
       window.storeConfig.header = name;
       localStorage.setItem('mf_garments_store_config', JSON.stringify(window.storeConfig));
@@ -1135,7 +1140,6 @@
       }
       const cfg = window.storeConfig || {};
 
-      // Dynamic Dukandar Shop Name (Pehle user ki dukan ka naam, warna registered naam)
       const currentShopName = cfg.name || window.currentStore.store_name || "Garments Store";
       document.getElementById("header-store-display").innerText = currentShopName;
       document.getElementById("header-plan-display").innerText = `${daysLeft}d Left`;
@@ -1161,7 +1165,7 @@
       window.addItemRow();
     };
 
-    // CLOTHES INVENTORY (PROTECTED AGAINST THEFT - NO DELETE BUTTON)
+    // CLOTHES INVENTORY (WITH EXACT ADJUST, EDIT, DELETE ACTIONS)
     async function loadCloudInventory() {
       const { data } = await client.from("products").select("*").eq("store_id", window.currentStore.id).order("name");
       
@@ -1211,6 +1215,7 @@
       const tbody = document.getElementById('inventory-table-body');
       tbody.innerHTML = list.map(p => {
         const wholesalePrice = p.wholesale_price || (p.price * 0.85);
+        const stockVal = ((p.cost || p.price * 0.6) * (p.stock || 0)).toLocaleString('en-IN');
         const isLow = (p.stock || 0) <= 5;
 
         return `
@@ -1227,16 +1232,32 @@
             <td class="px-3 py-3 font-bold font-mono text-purple-400">₹${parseFloat(wholesalePrice).toFixed(2)}</td>
             <td class="px-3 py-3">
               <span style="background-color: ${isLow ? 'var(--badge-amber-bg)' : 'var(--badge-green-bg)'}; color: ${isLow ? 'var(--badge-amber-txt)' : 'var(--badge-green-txt)'};" class="text-[10px] px-2.5 py-0.5 rounded-full font-bold">
-                ${isLow ? 'Low · ' : ''}${p.stock || 0} Pcs
+                ${isLow ? 'Reorder · ' : 'In Stock · '}${p.stock || 0}
               </span>
             </td>
+            <td class="px-3 py-3 font-mono font-bold" style="color: var(--text-main)">₹${stockVal}.00</td>
             <td class="px-4 py-3 text-right space-x-1.5 whitespace-nowrap">
-              <button onclick="openAdjustModal('${p.id}')" class="px-2.5 py-1 rounded-lg bg-indigo-600/15 text-indigo-400 hover:bg-indigo-600 hover:text-white transition text-[11px] font-bold">Stock</button>
-              <button onclick="openEditModal('${p.id}')" class="px-2.5 py-1 rounded-lg custom-card hover:bg-slate-700 transition text-[11px] font-bold" style="color: var(--text-main)">Edit</button>
+              <button onclick="openAdjustModal('${p.id}')" class="px-3 py-1 rounded-lg bg-blue-600/30 text-blue-400 border border-blue-500/40 hover:bg-blue-600 hover:text-white transition text-[11px] font-bold">Adjust</button>
+              <button onclick="openEditModal('${p.id}')" class="px-3 py-1 rounded-lg bg-slate-800/80 text-slate-200 border border-slate-700 hover:bg-slate-700 transition text-[11px] font-bold">Edit</button>
+              <button onclick="deleteProduct('${p.id}', '${p.name.replace(/'/g, "\\'")}')" class="px-3 py-1 rounded-lg bg-rose-600/20 text-rose-400 border border-rose-500/40 hover:bg-rose-600 hover:text-white transition text-[11px] font-bold">Delete</button>
             </td>
           </tr>
         `;
       }).join('');
+    };
+
+    // DELETE STOCK ITEM
+    window.deleteProduct = async function(id, name) {
+      if (!confirm(`Kya aap sach me '${name}' ko inventory se delete karna chahte hain?`)) return;
+
+      const { error } = await client.from("products").delete().eq("id", id);
+      if (error) {
+        alert("Delete fail hua: " + error.message);
+        return;
+      }
+
+      alert(`✅ '${name}' ko inventory se delete kar diya gaya.`);
+      await loadCloudInventory();
     };
 
     window.openEditModal = function(id) {
@@ -1336,7 +1357,7 @@
       await loadCloudInventory();
     };
 
-    // SALES & COUNTER POS (SILENT 6-MONTH AUTO-PURGE IN BACKGROUND)
+    // SALES & COUNTER POS
     async function loadCloudSales() {
       if (!window.currentStore) return;
 
@@ -1695,21 +1716,35 @@
       setTimeout(() => { window.print(); }, 50);
     };
 
-    // SALES LEDGER
+    // SALES LEDGER (SEARCH FILTER ADDED)
     window.renderSales = function() {
-      document.getElementById('stat-total-bills').innerText = window.sales.length;
-      const total = window.sales.reduce((a, s) => a + parseFloat(s.total || 0), 0);
+      const searchInput = document.getElementById('sales-search-input');
+      const q = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+      let list = window.sales || [];
+
+      if (q) {
+        list = list.filter(s => 
+          (s.customer_name && s.customer_name.toLowerCase().includes(q)) ||
+          (s.customer_phone && s.customer_phone.includes(q)) ||
+          (s.invoice_no && s.invoice_no.toLowerCase().includes(q)) ||
+          (s.note && s.note.toLowerCase().includes(q))
+        );
+      }
+
+      document.getElementById('stat-total-bills').innerText = list.length;
+      const total = list.reduce((a, s) => a + parseFloat(s.total || 0), 0);
       document.getElementById('stat-total-amount').innerText = `₹${total.toFixed(2)}`;
 
-      const wholesaleCount = window.sales.filter(s => (s.invoice_no && s.invoice_no.startsWith("WS-")) || (s.note && s.note.includes("WHOLESALE"))).length;
-      const retailCount = window.sales.length - wholesaleCount;
+      const wholesaleCount = list.filter(s => (s.invoice_no && s.invoice_no.startsWith("WS-")) || (s.note && s.note.includes("WHOLESALE"))).length;
+      const retailCount = list.length - wholesaleCount;
       document.getElementById('stat-bill-splits').innerText = `${retailCount} Retail • ${wholesaleCount} Wholesale`;
 
-      const list = document.getElementById('sales-ledger-list');
-      if (window.sales.length === 0) {
-        list.innerHTML = '<p class="text-center ui-subtext py-6 text-xs font-semibold">No active garment transactions recorded in the last 6 months.</p>';
+      const listContainer = document.getElementById('sales-ledger-list');
+      if (list.length === 0) {
+        listContainer.innerHTML = '<p class="text-center ui-subtext py-6 text-xs font-semibold">Koi matching garment bill nahi mila.</p>';
       } else {
-        list.innerHTML = window.sales.map((s, index) => {
+        listContainer.innerHTML = list.map((s, index) => {
           const isWS = (s.invoice_no && s.invoice_no.startsWith("WS-")) || (s.note && s.note.includes("WHOLESALE"));
           const d = new Date(s.created_at || Date.now());
           const dateStr = d.toLocaleDateString("en-IN") + " " + d.toLocaleTimeString("en-US", { hour: '2-digit', minute:'2-digit' });
@@ -1724,7 +1759,7 @@
                   </span>
                   <span class="text-[10px] ui-subtext font-semibold">${s.items ? s.items.length : 1} item(s)</span>
                 </div>
-                <p class="text-[10px] ui-subtext mt-0.5">${dateStr} • <strong style="color: var(--text-main)">${s.customer_name || 'Buyer'}</strong> (${s.mode})</p>
+                <p class="text-[10px] ui-subtext mt-0.5">${dateStr} • <strong style="color: var(--text-main)">${s.customer_name || 'Buyer'}</strong> ${s.customer_phone && s.customer_phone !== 'N/A' ? `(${s.customer_phone})` : ''} • (${s.mode})</p>
               </div>
               <div class="flex items-center gap-2">
                 <span class="font-bold text-xs font-mono text-emerald-400 mr-2">₹${parseFloat(s.total).toFixed(2)}</span>
@@ -1789,7 +1824,7 @@
       }
     };
 
-    // SUPER ADMIN MANAGEMENT (STRICT GARMENTS FILTER)
+    // SUPER ADMIN MANAGEMENT
     window.promptSuperAdminAccess = function() {
       const email = prompt("Enter Master Admin Email:");
       if (!email) return;
@@ -2069,7 +2104,7 @@
       if (view === 'sales') renderSales();
     };
 
-    // DYNAMIC SHOP NAME SAVING (UPDATES DATABASE & HEADER INSTANTLY)
+    // DYNAMIC SHOP NAME SAVING
     window.saveStoreSettings = async function() {
       const newShopName = document.getElementById('setting-store-name').value.trim() || 'Garments Store';
       
@@ -2087,10 +2122,8 @@
       };
       localStorage.setItem('mf_garments_store_config', JSON.stringify(window.storeConfig));
 
-      // Header me shop name turant badal do
       document.getElementById('header-store-display').innerText = newShopName;
 
-      // Supabase cloud database me bhi dukan ka naya naam save karo
       if (window.currentStore) {
         window.currentStore.store_name = newShopName;
         localStorage.setItem("martflow_garments_isolated_session", JSON.stringify(window.currentStore));
